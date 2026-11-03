@@ -72,7 +72,8 @@ namespace src.GUI.Auth
             // Logic load ảnh (Hỗ trợ SVG/PNG)
             try
             {
-                string imgPath = "img/login-image.svg";
+                string imgPath = System.IO.Path.Combine(
+                AppContext.BaseDirectory,"img","login-image.svg");
                 if (System.IO.File.Exists(imgPath))
                 {
                     if (imgPath.EndsWith(".svg", System.StringComparison.OrdinalIgnoreCase))
