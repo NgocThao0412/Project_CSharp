@@ -7,16 +7,9 @@ namespace src.Helper
     {
         // 1. Định dạng tiền VND (Ví dụ: 1,000,000đ hoặc 1.000.000đ tùy cài đặt máy)
         public static string FormatVND(double vnd)
-        {
-            // Cách 1: Dùng định dạng số cơ bản (giống hệt Java "###,###,###")
-            // "#,###" sẽ tự động dùng dấu phân cách hàng nghìn theo cài đặt máy tính của bạn
-            return vnd.ToString("#,###") + "đ";
-
-            /* * Mở rộng: Nếu bạn muốn BẮT BUỘC dùng dấu chấm (.) phân cách hàng nghìn (Chuẩn Việt Nam)
-             * bất kể máy tính đang cài đặt tiếng Anh hay Việt, thì dùng code này:
-             * * CultureInfo cul = CultureInfo.GetCultureInfo("vi-VN");
-             * return vnd.ToString("#,###", cul.NumberFormat) + "đ";
-             */
+{
+        var culture = System.Globalization.CultureInfo.GetCultureInfo("vi-VN");
+        return vnd.ToString("N0", culture) + " đ";
         }
 
         // 2. Định dạng thời gian (Timestamp -> String)

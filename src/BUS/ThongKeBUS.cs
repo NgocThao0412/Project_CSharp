@@ -23,7 +23,7 @@ namespace src.BUS
             try
             {
                 // Lấy thống kê tồn kho từ đầu đến hiện tại
-                listTonKho = thongkeDAO.GetThongKeTonKho("", DateTime.MinValue, DateTime.Now) ?? new List<ThongKeTonKhoDTO>();
+                listTonKho = thongkeDAO.GetThongKeTonKho("",new DateTime(1753, 1, 1), DateTime.Now) ?? new List<ThongKeTonKhoDTO>();
             }
             catch (Exception ex)
             {
@@ -34,7 +34,7 @@ namespace src.BUS
 
         public List<ThongKeKhachHangDTO> GetAllKhachHang()
         {
-            tkkh = thongkeDAO.GetThongKeKhachHang("", DateTime.MinValue, DateTime.Now);
+            tkkh = thongkeDAO.GetThongKeKhachHang("", new DateTime(1753, 1, 1), DateTime.Now);
             return tkkh;
         }
 
@@ -46,7 +46,11 @@ namespace src.BUS
 
         public List<ThongKeNhaCungCapDTO> GetAllNCC()
         {
-            tkncc = thongkeDAO.GetThongKeNCC("", DateTime.MinValue, DateTime.Now);
+           tkncc = thongkeDAO.GetThongKeNCC(
+    "",
+    new DateTime(1753, 1, 1),
+    DateTime.Now
+);
             return tkncc;
         }
 
