@@ -573,6 +573,20 @@ namespace src.DAO
             {
                 return 0;
             }
+            // Tính tổng tiền trực tiếp từ chi tiết phiếu xuất
+            int tongTien;
+
+            try
+            {
+                long tong = chiTiet.Sum(ct =>
+                    checked((long)ct.SL * ct.TIENXUAT));
+
+                tongTien = checked((int)tong);
+            }
+            catch (OverflowException)
+            {
+                return 0;
+            }
 
             try
             {
@@ -608,7 +622,7 @@ namespace src.DAO
 
                             cmd.Parameters.Add(
                                 "@tien", SqlDbType.Int
-                            ).Value = phieu.TIEN;
+                            ).Value = tongTien;
 
                             cmd.Parameters.Add(
                                 "@tg", SqlDbType.DateTime
@@ -716,6 +730,20 @@ namespace src.DAO
             {
                 return false;
             }
+            // Tính lại tổng tiền từ chi tiết phiếu xuất
+            int tongTien;
+
+            try
+            {
+                long tong = chiTiet.Sum(ct =>
+                    checked((long)ct.SL * ct.TIENXUAT));
+
+                tongTien = checked((int)tong);
+            }
+            catch (OverflowException)
+            {
+                return false;
+            }
 
             using (SqlConnection conn =
                 SqlServerHelper.GetConnection())
@@ -771,7 +799,7 @@ namespace src.DAO
                             .Value = phieu.MKH;
 
                         cmd.Parameters.Add("@tien", SqlDbType.Int)
-                            .Value = phieu.TIEN;
+                            .Value = tongTien;
 
                         cmd.Parameters.Add("@tg", SqlDbType.DateTime)
                             .Value = phieu.TG;

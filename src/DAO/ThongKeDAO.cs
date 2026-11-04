@@ -25,7 +25,7 @@ namespace src.DAO
 
         private ThongKeDAO() { }
 
-        // Hàm chuyển số tiền từ SQL Server.
+        // Chuyển số tiền SQL Server về kiểu long.
         private static long GetLong(
             SqlDataReader rs, string column)
         {
@@ -36,7 +36,14 @@ namespace src.DAO
                 : Convert.ToInt64(rs.GetValue(index));
         }
 
-        // Đọc thống kê doanh thu, chi phí theo ngày.
+        // Giá vốn được ước tính bằng số lượng bán
+        // nhân với giá nhập hiện tại trong SANPHAM.
+        // Không phải giá vốn lịch sử tại thời điểm bán.
+
+        // ==================================================
+        // THỐNG KÊ THEO NGÀY
+        // ==================================================
+
         private static List<ThongKeTungNgayTrongThangDTO>
             GetThongKeTheoNgay(DateTime start, DateTime end)
         {
@@ -80,14 +87,40 @@ namespace src.DAO
                       AND TG < DATEADD(
                           DAY, 1, CAST(@end AS DATE))
                     GROUP BY CAST(TG AS DATE)
+                ),
+                giavon AS
+                (
+                    SELECT
+                        CAST(px.TG AS DATE) AS ngay,
+                        SUM(
+                            CAST(ct.SL AS BIGINT) *
+                            CAST(sp.TIENN AS BIGINT)
+                        ) AS tonggiavon
+                    FROM PHIEUXUAT px
+                    INNER JOIN CTPHIEUXUAT ct
+                        ON ct.MPX = px.MPX
+                    INNER JOIN SANPHAM sp
+                        ON sp.MSP = ct.MSP
+                    WHERE px.TT = 1
+                      AND px.TG >= @start
+                      AND px.TG < DATEADD(
+                          DAY, 1, CAST(@end AS DATE))
+                    GROUP BY CAST(px.TG AS DATE)
                 )
                 SELECT
                     d.ngay,
                     COALESCE(n.chiphi, 0) AS chiphi,
-                    COALESCE(x.doanhthu, 0) AS doanhthu
+                    COALESCE(x.doanhthu, 0) AS doanhthu,
+                    COALESCE(x.doanhthu, 0)
+                        - COALESCE(g.tonggiavon, 0)
+                        AS loinhuan
                 FROM dates d
-                LEFT JOIN nhap n ON n.ngay = d.ngay
-                LEFT JOIN xuat x ON x.ngay = d.ngay
+                LEFT JOIN nhap n
+                    ON n.ngay = d.ngay
+                LEFT JOIN xuat x
+                    ON x.ngay = d.ngay
+                LEFT JOIN giavon g
+                    ON g.ngay = d.ngay
                 ORDER BY d.ngay
                 OPTION (MAXRECURSION 0)";
 
@@ -121,15 +154,15 @@ namespace src.DAO
                             int doanhThu = checked((int)
                                 GetLong(rs, "doanhthu"));
 
-                            int chenhLech = checked(
-                                doanhThu - chiPhi);
+                            int loiNhuan = checked((int)
+                                GetLong(rs, "loinhuan"));
 
                             result.Add(
                                 new ThongKeTungNgayTrongThangDTO(
                                     ngay,
                                     chiPhi,
                                     doanhThu,
-                                    chenhLech
+                                    loiNhuan
                                 ));
                         }
                     }
@@ -147,7 +180,10 @@ namespace src.DAO
             return result;
         }
 
-        // 1. Thống kê tồn kho
+        // ==================================================
+        // 1. THỐNG KÊ TỒN KHO
+        // ==================================================
+
         public List<ThongKeTonKhoDTO> GetThongKeTonKho(
             string text,
             DateTime timeStart,
@@ -160,8 +196,7 @@ namespace src.DAO
 
             // Tồn đầu kỳ được suy ngược từ tồn hiện tại
             // và các phiếu đã duyệt kể từ đầu kỳ.
-            // Phương pháp này cần sổ điều chỉnh kiểm kê
-            // nếu muốn báo cáo tồn lịch sử chính xác.
+            // Chưa bao gồm lịch sử điều chỉnh kiểm kê.
 
             const string sql = @"
                 WITH nhap AS
@@ -170,7 +205,8 @@ namespace src.DAO
                         ct.MSP,
                         SUM(CAST(ct.SL AS BIGINT)) AS slnhap
                     FROM CTPHIEUNHAP ct
-                    JOIN PHIEUNHAP pn ON pn.MPN = ct.MPN
+                    JOIN PHIEUNHAP pn
+                        ON pn.MPN = ct.MPN
                     WHERE pn.TT = 1
                       AND pn.TG >= @start
                       AND pn.TG < @endExclusive
@@ -182,7 +218,8 @@ namespace src.DAO
                         ct.MSP,
                         SUM(CAST(ct.SL AS BIGINT)) AS slxuat
                     FROM CTPHIEUXUAT ct
-                    JOIN PHIEUXUAT px ON px.MPX = ct.MPX
+                    JOIN PHIEUXUAT px
+                        ON px.MPX = ct.MPX
                     WHERE px.TT = 1
                       AND px.TG >= @start
                       AND px.TG < @endExclusive
@@ -194,7 +231,8 @@ namespace src.DAO
                         ct.MSP,
                         SUM(CAST(ct.SL AS BIGINT)) AS sl
                     FROM CTPHIEUNHAP ct
-                    JOIN PHIEUNHAP pn ON pn.MPN = ct.MPN
+                    JOIN PHIEUNHAP pn
+                        ON pn.MPN = ct.MPN
                     WHERE pn.TT = 1
                       AND pn.TG >= @start
                     GROUP BY ct.MSP
@@ -205,7 +243,8 @@ namespace src.DAO
                         ct.MSP,
                         SUM(CAST(ct.SL AS BIGINT)) AS sl
                     FROM CTPHIEUXUAT ct
-                    JOIN PHIEUXUAT px ON px.MPX = ct.MPX
+                    JOIN PHIEUXUAT px
+                        ON px.MPX = ct.MPX
                     WHERE px.TT = 1
                       AND px.TG >= @start
                     GROUP BY ct.MSP
@@ -213,27 +252,36 @@ namespace src.DAO
                 SELECT
                     sp.MSP,
                     sp.TEN,
+
                     CAST(sp.SL AS BIGINT)
-                      - COALESCE(ns.sl, 0)
-                      + COALESCE(xs.sl, 0)
+                        - COALESCE(ns.sl, 0)
+                        + COALESCE(xs.sl, 0)
                         AS SLdauky,
+
                     COALESCE(n.slnhap, 0) AS SLnhap,
                     COALESCE(x.slxuat, 0) AS SLxuat,
+
                     CAST(sp.SL AS BIGINT)
-                      - COALESCE(ns.sl, 0)
-                      + COALESCE(xs.sl, 0)
-                      + COALESCE(n.slnhap, 0)
-                      - COALESCE(x.slxuat, 0)
+                        - COALESCE(ns.sl, 0)
+                        + COALESCE(xs.sl, 0)
+                        + COALESCE(n.slnhap, 0)
+                        - COALESCE(x.slxuat, 0)
                         AS SLcuoiky
+
                 FROM SANPHAM sp
-                LEFT JOIN nhap n ON n.MSP = sp.MSP
-                LEFT JOIN xuat x ON x.MSP = sp.MSP
-                LEFT JOIN nhap_sau ns ON ns.MSP = sp.MSP
-                LEFT JOIN xuat_sau xs ON xs.MSP = sp.MSP
-                WHERE
-                    sp.TEN LIKE @text
-                    OR CAST(sp.MSP AS NVARCHAR(30))
+                LEFT JOIN nhap n
+                    ON n.MSP = sp.MSP
+                LEFT JOIN xuat x
+                    ON x.MSP = sp.MSP
+                LEFT JOIN nhap_sau ns
+                    ON ns.MSP = sp.MSP
+                LEFT JOIN xuat_sau xs
+                    ON xs.MSP = sp.MSP
+
+                WHERE sp.TEN LIKE @text
+                   OR CAST(sp.MSP AS NVARCHAR(30))
                         LIKE @text
+
                 ORDER BY sp.MSP";
 
             try
@@ -299,13 +347,17 @@ namespace src.DAO
                 Console.WriteLine(
                     "Lỗi GetThongKeTonKho: "
                     + ex.Message);
+
                 throw;
             }
 
             return result;
         }
 
-        // 2. Thống kê doanh thu theo năm
+        // ==================================================
+        // 2. THỐNG KÊ DOANH THU THEO NĂM
+        // ==================================================
+
         public List<ThongKeDoanhThuDTO>
             GetDoanhThuTheoTungNam(
                 int yearStart, int yearEnd)
@@ -321,7 +373,9 @@ namespace src.DAO
                 WITH years AS
                 (
                     SELECT @startYear AS nam
+
                     UNION ALL
+
                     SELECT nam + 1
                     FROM years
                     WHERE nam < @endYear
@@ -347,14 +401,39 @@ namespace src.DAO
                       AND TG >= @startDate
                       AND TG < @endDate
                     GROUP BY YEAR(TG)
+                ),
+                giavon AS
+                (
+                    SELECT
+                        YEAR(px.TG) AS nam,
+                        SUM(
+                            CAST(ct.SL AS BIGINT) *
+                            CAST(sp.TIENN AS BIGINT)
+                        ) AS tonggiavon
+                    FROM PHIEUXUAT px
+                    INNER JOIN CTPHIEUXUAT ct
+                        ON ct.MPX = px.MPX
+                    INNER JOIN SANPHAM sp
+                        ON sp.MSP = ct.MSP
+                    WHERE px.TT = 1
+                      AND px.TG >= @startDate
+                      AND px.TG < @endDate
+                    GROUP BY YEAR(px.TG)
                 )
                 SELECT
                     y.nam,
                     COALESCE(n.chiphi, 0) AS chiphi,
-                    COALESCE(x.doanhthu, 0) AS doanhthu
+                    COALESCE(x.doanhthu, 0) AS doanhthu,
+                    COALESCE(x.doanhthu, 0)
+                        - COALESCE(g.tonggiavon, 0)
+                        AS loinhuan
                 FROM years y
-                LEFT JOIN nhap n ON n.nam = y.nam
-                LEFT JOIN xuat x ON x.nam = y.nam
+                LEFT JOIN nhap n
+                    ON n.nam = y.nam
+                LEFT JOIN xuat x
+                    ON x.nam = y.nam
+                LEFT JOIN giavon g
+                    ON g.nam = y.nam
                 ORDER BY y.nam
                 OPTION (MAXRECURSION 0)";
 
@@ -400,11 +479,14 @@ namespace src.DAO
                             long doanhThu =
                                 GetLong(rs, "doanhthu");
 
+                            long loiNhuan =
+                                GetLong(rs, "loinhuan");
+
                             result.Add(new ThongKeDoanhThuDTO(
                                 nam,
                                 chiPhi,
                                 doanhThu,
-                                doanhThu - chiPhi
+                                loiNhuan
                             ));
                         }
                     }
@@ -415,13 +497,17 @@ namespace src.DAO
                 Console.WriteLine(
                     "Lỗi GetDoanhThuTheoTungNam: "
                     + ex.Message);
+
                 throw;
             }
 
             return result;
         }
 
-        // 3. Thống kê khách hàng
+        // ==================================================
+        // 3. THỐNG KÊ KHÁCH HÀNG
+        // ==================================================
+
         public List<ThongKeKhachHangDTO>
             GetThongKeKhachHang(
                 string text,
@@ -441,9 +527,11 @@ namespace src.DAO
                     COALESCE(
                         SUM(CAST(px.TIEN AS BIGINT)), 0
                     ) AS total
+
                 FROM KHACHHANG kh
                 JOIN PHIEUXUAT px
                     ON px.MKH = kh.MKH
+
                 WHERE px.TT = 1
                   AND px.TG >= @start
                   AND px.TG < @endExclusive
@@ -452,6 +540,7 @@ namespace src.DAO
                       OR CAST(kh.MKH AS NVARCHAR(30))
                           LIKE @text
                   )
+
                 GROUP BY kh.MKH, kh.HOTEN
                 ORDER BY total DESC";
 
@@ -490,7 +579,10 @@ namespace src.DAO
             return result;
         }
 
-        // 4. Thống kê nhà cung cấp
+        // ==================================================
+        // 4. THỐNG KÊ NHÀ CUNG CẤP
+        // ==================================================
+
         public List<ThongKeNhaCungCapDTO>
             GetThongKeNCC(
                 string text,
@@ -510,9 +602,11 @@ namespace src.DAO
                     COALESCE(
                         SUM(CAST(pn.TIEN AS BIGINT)), 0
                     ) AS total
+
                 FROM NHACUNGCAP ncc
                 JOIN PHIEUNHAP pn
                     ON pn.MNCC = ncc.MNCC
+
                 WHERE pn.TT = 1
                   AND pn.TG >= @start
                   AND pn.TG < @endExclusive
@@ -521,6 +615,7 @@ namespace src.DAO
                       OR CAST(ncc.MNCC AS NVARCHAR(30))
                           LIKE @text
                   )
+
                 GROUP BY ncc.MNCC, ncc.TEN
                 ORDER BY total DESC";
 
@@ -559,7 +654,10 @@ namespace src.DAO
             return result;
         }
 
-        // 5. Thống kê 12 tháng trong một năm
+        // ==================================================
+        // 5. THỐNG KÊ 12 THÁNG TRONG NĂM
+        // ==================================================
+
         public List<ThongKeTheoThangDTO>
             GetThongKeTheoThang(int nam)
         {
@@ -572,7 +670,9 @@ namespace src.DAO
                 WITH months AS
                 (
                     SELECT 1 AS thang
+
                     UNION ALL
+
                     SELECT thang + 1
                     FROM months
                     WHERE thang < 12
@@ -596,14 +696,38 @@ namespace src.DAO
                     WHERE TT = 1
                       AND YEAR(TG) = @nam
                     GROUP BY MONTH(TG)
+                ),
+                giavon AS
+                (
+                    SELECT
+                        MONTH(px.TG) AS thang,
+                        SUM(
+                            CAST(ct.SL AS BIGINT) *
+                            CAST(sp.TIENN AS BIGINT)
+                        ) AS tonggiavon
+                    FROM PHIEUXUAT px
+                    INNER JOIN CTPHIEUXUAT ct
+                        ON ct.MPX = px.MPX
+                    INNER JOIN SANPHAM sp
+                        ON sp.MSP = ct.MSP
+                    WHERE px.TT = 1
+                      AND YEAR(px.TG) = @nam
+                    GROUP BY MONTH(px.TG)
                 )
                 SELECT
                     m.thang,
                     COALESCE(n.chiphi, 0) AS chiphi,
-                    COALESCE(x.doanhthu, 0) AS doanhthu
+                    COALESCE(x.doanhthu, 0) AS doanhthu,
+                    COALESCE(x.doanhthu, 0)
+                        - COALESCE(g.tonggiavon, 0)
+                        AS loinhuan
                 FROM months m
-                LEFT JOIN nhap n ON n.thang = m.thang
-                LEFT JOIN xuat x ON x.thang = m.thang
+                LEFT JOIN nhap n
+                    ON n.thang = m.thang
+                LEFT JOIN xuat x
+                    ON x.thang = m.thang
+                LEFT JOIN giavon g
+                    ON g.thang = m.thang
                 ORDER BY m.thang";
 
             using (SqlConnection conn =
@@ -629,11 +753,14 @@ namespace src.DAO
                         int doanhThu = checked((int)
                             GetLong(rs, "doanhthu"));
 
+                        int loiNhuan = checked((int)
+                            GetLong(rs, "loinhuan"));
+
                         result.Add(new ThongKeTheoThangDTO(
                             thang,
                             chiPhi,
                             doanhThu,
-                            checked(doanhThu - chiPhi)
+                            loiNhuan
                         ));
                     }
                 }
@@ -642,7 +769,10 @@ namespace src.DAO
             return result;
         }
 
-        // 6. Thống kê từng ngày trong một tháng
+        // ==================================================
+        // 6. THỐNG KÊ TỪNG NGÀY TRONG MỘT THÁNG
+        // ==================================================
+
         public List<ThongKeTungNgayTrongThangDTO>
             GetThongKeTungNgayTrongThang(
                 int thang, int nam)
@@ -664,8 +794,10 @@ namespace src.DAO
             return GetThongKeTheoNgay(start, end);
         }
 
-        // 7. Thống kê 7 ngày gần nhất
-        // Bao gồm hôm nay và 6 ngày trước đó.
+        // ==================================================
+        // 7. THỐNG KÊ 7 NGÀY GẦN NHẤT
+        // ==================================================
+
         public List<ThongKeTungNgayTrongThangDTO>
             GetThongKe7NgayGanNhat()
         {
@@ -675,7 +807,10 @@ namespace src.DAO
             return GetThongKeTheoNgay(start, end);
         }
 
-        // 8. Thống kê theo khoảng ngày
+        // ==================================================
+        // 8. THỐNG KÊ THEO KHOẢNG NGÀY
+        // ==================================================
+
         public List<ThongKeTungNgayTrongThangDTO>
             GetThongKeTuNgayDenNgay(
                 string start, string end)

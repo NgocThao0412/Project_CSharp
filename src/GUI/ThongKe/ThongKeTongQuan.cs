@@ -228,13 +228,13 @@ namespace src.GUI.ThongKe
             legend.Alignment = StringAlignment.Center;
             chartDoanhThu.Legends.Add(legend);
 
-            Series s1 = new Series("Vốn") { ChartType = SeriesChartType.Spline, Color = Color.FromArgb(12, 84, 175), BorderWidth = 3 };
+            Series s1 = new Series("Vốn") { ChartType = SeriesChartType.Line, Color = Color.FromArgb(12, 84, 175), BorderWidth = 3 };
             chartDoanhThu.Series.Add(s1);
 
-            Series s2 = new Series("Doanh thu") { ChartType = SeriesChartType.Spline, Color = Color.FromArgb(54, 4, 143), BorderWidth = 3 };
+            Series s2 = new Series("Doanh thu") { ChartType = SeriesChartType.Line, Color = Color.FromArgb(54, 4, 143), BorderWidth = 3 };
             chartDoanhThu.Series.Add(s2);
 
-            Series s3 = new Series("Lợi nhuận") { ChartType = SeriesChartType.Spline, Color = Color.FromArgb(211, 84, 0), BorderWidth = 3 };
+            Series s3 = new Series("Lợi nhuận") { ChartType = SeriesChartType.Line, Color = Color.FromArgb(211, 84, 0), BorderWidth = 3 };
             chartDoanhThu.Series.Add(s3);
         }
 
