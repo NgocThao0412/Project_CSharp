@@ -1,0 +1,20 @@
+@model CatalogListViewModel
+@{ ViewData["Title"] = "Danh sách sản phẩm"; var data = Model.Results; }
+<section class="page-head"><div class="wrap"><div class="eyebrow blue">DANH MỤC LINH KIỆN</div><h1>@(string.IsNullOrEmpty(data.Keyword) ? "Tất cả sản phẩm" : $"Kết quả cho “{data.Keyword}”")</h1><p>Tìm kiếm theo tên, thương hiệu hoặc lọc theo danh mục.</p></div></section>
+<section class="wrap section">
+    <form class="filters" method="get" action="/san-pham">
+        <label>Tìm kiếm <input name="q" value="@data.Keyword" maxlength="100" placeholder="Nhập tên linh kiện..." /></label>
+        <label>Danh mục <select name="category"><option value="">Tất cả danh mục</option>@foreach (var c in Model.Categories){if(c==data.Category){<option value="@c" selected>@c</option>}else{<option value="@c">@c</option>}}</select></label>
+        <button type="submit">Áp dụng</button><a class="reset" href="/san-pham">Xóa lọc</a>
+    </form>
+    <div class="results-summary">Tìm thấy <strong>@data.Total</strong> sản phẩm</div>
+    @if (data.Items.Count == 0) { <div class="empty-state"><h2>Không tìm thấy sản phẩm</h2><p>Thử từ khóa khác hoặc bỏ lọc danh mục.</p><a href="/san-pham">Xem tất cả sản phẩm</a></div> }
+    else { <div class="product-grid">@foreach (var item in data.Items){<partial name="_ProductCard" model="item" />}</div> }
+    @if (data.PageCount > 1) {
+        <nav class="pagination" aria-label="Phân trang">
+          @for (int p = Math.Max(1, data.Page - 2); p <= Math.Min(data.PageCount, data.Page + 2); p++) {
+            <a class="@(p==data.Page ? "active" : "")" asp-controller="Products" asp-action="Index" asp-route-q="@data.Keyword" asp-route-category="@data.Category" asp-route-page="@p" aria-current="@(p==data.Page ? "page" : null)">@p</a>
+          }
+        </nav>
+    }
+</section>

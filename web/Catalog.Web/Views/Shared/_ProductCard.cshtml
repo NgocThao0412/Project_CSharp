@@ -1,0 +1,17 @@
+@model CatalogProduct
+<article class="product-card">
+    <a class="product-image" asp-controller="Products" asp-action="Details" asp-route-id="@Model.Id" aria-label="Xem @Model.Name">
+        @if (!string.IsNullOrWhiteSpace(Model.ImageUrl))
+        {
+            <img src="@Model.ImageUrl" alt="@Model.Name" loading="lazy" />
+        }
+        else { <span aria-hidden="true">PC</span> }
+    </a>
+    <div class="product-body">
+        <div class="muted">@Model.Category · @Model.Brand</div>
+        <h3><a asp-controller="Products" asp-action="Details" asp-route-id="@Model.Id">@Model.Name</a></h3>
+        <div class="price">@Model.Price.ToString("N0", System.Globalization.CultureInfo.GetCultureInfo("vi-VN")) ₫</div>
+        <div class="stock @(Model.AvailableQuantity <= 0 ? "sold-out" : "")">@(Model.AvailableQuantity > 0 ? $"Còn {Model.AvailableQuantity} sản phẩm" : "Tạm hết hàng")</div>
+        <a class="details-link" asp-controller="Products" asp-action="Details" asp-route-id="@Model.Id">Xem chi tiết →</a>
+    </div>
+</article>
