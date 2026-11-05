@@ -1,6 +1,6 @@
 @model CatalogListViewModel
 @{ ViewData["Title"] = "Danh sách sản phẩm"; var data = Model.Results; }
-<section class="page-head"><div class="wrap"><div class="eyebrow blue">DANH MỤC LINH KIỆN</div><h1>@(string.IsNullOrEmpty(data.Keyword) ? "Tất cả sản phẩm" : $"Kết quả cho “{data.Keyword}”")</h1><p>Tìm kiếm theo tên, thương hiệu hoặc lọc theo danh mục.</p></div></section>
+<section class="page-head"><div class="wrap"><div class="eyebrow blue"></div><h1>@(string.IsNullOrEmpty(data.Keyword) ? "Tất cả sản phẩm" : $"Kết quả cho “{data.Keyword}”")</h1><p>Tìm kiếm theo tên, thương hiệu hoặc lọc theo danh mục.</p></div></section>
 <section class="wrap section">
     <form class="filters" method="get" action="/san-pham">
         <label>Tìm kiếm <input name="q" value="@data.Keyword" maxlength="100" placeholder="Nhập tên linh kiện..." /></label>
