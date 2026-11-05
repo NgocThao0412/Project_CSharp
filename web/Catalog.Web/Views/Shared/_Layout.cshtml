@@ -10,10 +10,15 @@
 <header class="site-header">
     <div class="wrap header-inner">
         <a class="brand" asp-controller="Home" asp-action="Index"><span class="brand-icon">◈</span><span>CỬA HÀNG<br /><strong>LINH KIỆN MÁY TÍNH</strong></span></a>
-        <nav aria-label="Điều hướng chính">
+        <nav aria-label="Điều hướng chính" style="display:flex; align-items:center; gap:16px; flex-wrap:wrap;">
             <a asp-controller="Home" asp-action="Index">Trang chủ</a>
+            <form method="get" action="/tim-kiem" role="search" style="display:inline-flex; align-items:center; width:210px; height:34px; border:1px solid #cfd9eb; border-radius:8px; overflow:hidden; background:#fff; margin:0;">
+                <input type="search" name="q" maxlength="100" placeholder="Tìm sản phẩm..." aria-label="Tìm sản phẩm" style="width:100%; min-width:0; padding:6px 9px; border:0; outline:none; background:transparent; font:inherit; font-size:13px; color:#1f2937;" />
+                <button type="submit" aria-label="Tìm kiếm" style="height:100%; width:36px; flex-shrink:0; display:flex; align-items:center; justify-content:center; border:0; background:#1765e7; color:white; cursor:pointer;">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg>
+                </button>
+            </form>
             <a asp-controller="Products" asp-action="Index">Sản phẩm</a>
-            <a href="/tim-kiem">Tìm kiếm</a>
         </nav>
     </div>
 </header>

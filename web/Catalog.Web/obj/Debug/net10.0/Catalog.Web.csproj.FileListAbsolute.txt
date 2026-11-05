@@ -1,5 +1,4 @@
 /workspaces/Project_CSharp/web/Catalog.Web/bin/Debug/net10.0/appsettings.json
-/workspaces/Project_CSharp/web/Catalog.Web/bin/Debug/net10.0/Catalog.Web.staticwebassets.runtime.json
 /workspaces/Project_CSharp/web/Catalog.Web/bin/Debug/net10.0/Catalog.Web.staticwebassets.endpoints.json
 /workspaces/Project_CSharp/web/Catalog.Web/bin/Debug/net10.0/Catalog.Web
 /workspaces/Project_CSharp/web/Catalog.Web/bin/Debug/net10.0/Catalog.Web.deps.json
@@ -52,7 +51,6 @@
 /workspaces/Project_CSharp/web/Catalog.Web/obj/Debug/net10.0/rjsmrazor.dswa.cache.json
 /workspaces/Project_CSharp/web/Catalog.Web/obj/Debug/net10.0/rjsmcshtml.dswa.cache.json
 /workspaces/Project_CSharp/web/Catalog.Web/obj/Debug/net10.0/scopedcss/bundle/Catalog.Web.styles.css
-/workspaces/Project_CSharp/web/Catalog.Web/obj/Debug/net10.0/compressed/xthpkbk8g3-{0}-uhen5rp4r6-uhen5rp4r6.gz
 /workspaces/Project_CSharp/web/Catalog.Web/obj/Debug/net10.0/staticwebassets.build.json
 /workspaces/Project_CSharp/web/Catalog.Web/obj/Debug/net10.0/staticwebassets.build.json.cache
 /workspaces/Project_CSharp/web/Catalog.Web/obj/Debug/net10.0/staticwebassets.development.json
@@ -64,3 +62,5 @@
 /workspaces/Project_CSharp/web/Catalog.Web/obj/Debug/net10.0/Catalog.Web.pdb
 /workspaces/Project_CSharp/web/Catalog.Web/obj/Debug/net10.0/Catalog.Web.genruntimeconfig.cache
 /workspaces/Project_CSharp/web/Catalog.Web/obj/Debug/net10.0/ref/Catalog.Web.dll
+/workspaces/Project_CSharp/web/Catalog.Web/bin/Debug/net10.0/Catalog.Web.staticwebassets.runtime.json
+/workspaces/Project_CSharp/web/Catalog.Web/obj/Debug/net10.0/compressed/xthpkbk8g3-{0}-uhen5rp4r6-uhen5rp4r6.gz
