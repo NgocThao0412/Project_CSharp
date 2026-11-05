@@ -452,5 +452,153 @@ namespace src.DAO
                 return -1;
             }
         }
+
+        private static bool ChiTietHopLe(
+            List<ChiTietPhieuKiemKeDTO> ds)
+        {
+            return ds != null && ds.Count > 0 &&
+                ds.All(x => x.MSP > 0 && x.TRANGTHAISP >= 0) &&
+                ds.Select(x => x.MSP).Distinct().Count() == ds.Count;
+        }
+
+        private static void LuuChiTiet(
+            SqlConnection conn, SqlTransaction tran,
+            int mpkk, List<ChiTietPhieuKiemKeDTO> ds)
+        {
+            const string sql = @"
+        INSERT INTO CTPHIEUKIEMKE
+            (MPKK, MSP, TRANGTHAISP, GHICHU)
+        VALUES (@mpkk, @msp, @sl, @ghichu)";
+
+            foreach (var ct in ds)
+            {
+                using var cmd = new SqlCommand(sql, conn, tran);
+                cmd.Parameters.Add("@mpkk", SqlDbType.Int).Value = mpkk;
+                cmd.Parameters.Add("@msp", SqlDbType.Int).Value = ct.MSP;
+                cmd.Parameters.Add("@sl", SqlDbType.Int).Value = ct.TRANGTHAISP;
+                cmd.Parameters.Add("@ghichu", SqlDbType.NVarChar, -1)
+                    .Value = (object?)ct.GHICHU ?? DBNull.Value;
+
+                if (cmd.ExecuteNonQuery() != 1)
+                    throw new InvalidOperationException("Lưu chi tiết kiểm kê thất bại.");
+            }
+        }
+
+        public int CreateWithDetails(
+            PhieuKiemKeDTO phieu,
+            List<ChiTietPhieuKiemKeDTO> ds)
+        {
+            if (phieu == null || !ChiTietHopLe(ds))
+                return 0;
+
+            using var conn = SqlServerHelper.GetConnection();
+            using var tran = conn.BeginTransaction();
+
+            try
+            {
+                const string sql = @"
+            INSERT INTO PHIEUKIEMKE (MNV, TG, TT)
+            OUTPUT INSERTED.MPKK
+            VALUES (@mnv, @tg, 2)";
+
+                using var cmd = new SqlCommand(sql, conn, tran);
+                cmd.Parameters.Add("@mnv", SqlDbType.Int).Value = phieu.MNV;
+                cmd.Parameters.Add("@tg", SqlDbType.DateTime).Value = phieu.TG;
+
+                int mpkk = Convert.ToInt32(cmd.ExecuteScalar());
+                LuuChiTiet(conn, tran, mpkk, ds);
+
+                tran.Commit();
+                return mpkk;
+            }
+            catch (Exception ex)
+            {
+                try { tran.Rollback(); } catch { }
+                Console.WriteLine("Lỗi tạo phiếu kiểm kê: " + ex.Message);
+                return 0;
+            }
+        }
+
+        public bool UpdateWithDetails(
+            PhieuKiemKeDTO phieu,
+            List<ChiTietPhieuKiemKeDTO> ds)
+        {
+            if (phieu == null || !ChiTietHopLe(ds))
+                return false;
+
+            using var conn = SqlServerHelper.GetConnection();
+            using var tran = conn.BeginTransaction();
+
+            try
+            {
+                using (var cmd = new SqlCommand(@"
+            UPDATE PHIEUKIEMKE
+            SET MNV = @mnv, TG = @tg
+            WHERE MPKK = @mpkk AND TT = 2", conn, tran))
+                {
+                    cmd.Parameters.Add("@mnv", SqlDbType.Int).Value = phieu.MNV;
+                    cmd.Parameters.Add("@tg", SqlDbType.DateTime).Value = phieu.TG;
+                    cmd.Parameters.Add("@mpkk", SqlDbType.Int).Value = phieu.MPKK;
+
+                    if (cmd.ExecuteNonQuery() != 1)
+                    {
+                        tran.Rollback();
+                        return false;
+                    }
+                }
+
+                using (var cmd = new SqlCommand(@"
+            DELETE FROM CTPHIEUKIEMKE
+            WHERE MPKK = @mpkk", conn, tran))
+                {
+                    cmd.Parameters.Add("@mpkk", SqlDbType.Int).Value = phieu.MPKK;
+                    cmd.ExecuteNonQuery();
+                }
+
+                LuuChiTiet(conn, tran, phieu.MPKK, ds);
+                tran.Commit();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                try { tran.Rollback(); } catch { }
+                Console.WriteLine("Lỗi sửa phiếu kiểm kê: " + ex.Message);
+                return false;
+            }
+        }
+
+        public bool CancelWithDetails(int mpkk)
+        {
+            using var conn = SqlServerHelper.GetConnection();
+            using var tran = conn.BeginTransaction();
+
+            try
+            {
+                // Xóa mềm, giữ chi tiết để truy vết phiếu đã hủy.
+                using var cmd = new SqlCommand(@"
+            UPDATE PHIEUKIEMKE
+            SET TT = 0
+            WHERE MPKK = @mpkk AND TT = 2", conn, tran);
+
+                cmd.Parameters.Add("@mpkk", SqlDbType.Int).Value = mpkk;
+                bool success = cmd.ExecuteNonQuery() == 1;
+
+                if (!success)
+                {
+                    tran.Rollback();
+                    return false;
+                }
+
+                tran.Commit();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                try { tran.Rollback(); } catch { }
+                Console.WriteLine("Lỗi hủy phiếu kiểm kê: " + ex.Message);
+                return false;
+            }
+        }
+
     }
 }

@@ -5,6 +5,7 @@ using System.Data;
 using Microsoft.Data.SqlClient;
 using src.DTO;
 using src.config;
+using System.Linq;
 
 namespace src.DAO
 {
@@ -587,5 +588,213 @@ namespace src.DAO
                 }
             }
         }
+
+        public int CreateWithDetails(
+            PhieuNhapDTO phieu,
+            List<ChiTietPhieuNhapDTO> chiTiet)
+        {
+            if (phieu == null || chiTiet == null || chiTiet.Count == 0)
+                return 0;
+
+            int tongTien;
+
+            try
+            {
+                if (chiTiet.Any(ct => ct.SL <= 0 || ct.TIENNHAP < 0))
+                    return 0;
+
+                long tong = chiTiet.Sum(ct =>
+                    checked((long)ct.SL * ct.TIENNHAP));
+
+                tongTien = checked((int)tong);
+            }
+            catch (OverflowException)
+            {
+                return 0;
+            }
+
+            using (SqlConnection conn = SqlServerHelper.GetConnection())
+            using (SqlTransaction transaction = conn.BeginTransaction())
+            {
+                try
+                {
+                    const string sqlPhieu = @"
+                INSERT INTO PHIEUNHAP (MNV, MNCC, TIEN, TG, TT)
+                OUTPUT INSERTED.MPN
+                VALUES (@mnv, @mncc, @tien, @tg, 2)";
+
+                    int newMPN;
+
+                    using (SqlCommand cmd =
+                        new SqlCommand(sqlPhieu, conn, transaction))
+                    {
+                        cmd.Parameters.Add("@mnv", SqlDbType.Int)
+                            .Value = phieu.MNV;
+                        cmd.Parameters.Add("@mncc", SqlDbType.Int)
+                            .Value = phieu.MNCC;
+                        cmd.Parameters.Add("@tien", SqlDbType.Int)
+                            .Value = tongTien;
+                        cmd.Parameters.Add("@tg", SqlDbType.DateTime)
+                            .Value = phieu.TG;
+
+                        newMPN = Convert.ToInt32(cmd.ExecuteScalar());
+                    }
+
+                    const string sqlChiTiet = @"
+                INSERT INTO CTPHIEUNHAP
+                    (MPN, MSP, SL, TIENNHAP, HINHTHUC)
+                VALUES
+                    (@mpn, @msp, @sl, @tiennhap, @hinhthuc)";
+
+                    foreach (var item in chiTiet)
+                    {
+                        using (SqlCommand cmd =
+                            new SqlCommand(sqlChiTiet, conn, transaction))
+                        {
+                            cmd.Parameters.Add("@mpn", SqlDbType.Int)
+                                .Value = newMPN;
+                            cmd.Parameters.Add("@msp", SqlDbType.Int)
+                                .Value = item.MSP;
+                            cmd.Parameters.Add("@sl", SqlDbType.Int)
+                                .Value = item.SL;
+                            cmd.Parameters.Add("@tiennhap", SqlDbType.Int)
+                                .Value = item.TIENNHAP;
+                            cmd.Parameters.Add("@hinhthuc", SqlDbType.Int)
+                                .Value = item.HINHTHUC;
+
+                            if (cmd.ExecuteNonQuery() != 1)
+                                throw new InvalidOperationException(
+                                    "Không lưu được chi tiết phiếu nhập.");
+                        }
+                    }
+
+                    transaction.Commit();
+                    return newMPN;
+                }
+                catch (Exception ex)
+                {
+                    try { transaction.Rollback(); }
+                    catch { }
+
+                    Console.WriteLine(
+                        "Lỗi CreateWithDetails PhieuNhap: " + ex.Message);
+
+                    return 0;
+                }
+            }
+        }
+
+        public int UpdateWithDetails(
+            PhieuNhapDTO phieu,
+            List<ChiTietPhieuNhapDTO> chiTiet)
+        {
+            if (phieu == null || chiTiet == null || chiTiet.Count == 0)
+                return 0;
+
+            int tongTien;
+
+            try
+            {
+                if (chiTiet.Any(ct =>
+                    ct.SL <= 0 || ct.TIENNHAP < 0))
+                    return 0;
+
+                long tong = chiTiet.Sum(ct =>
+                    checked((long)ct.SL * ct.TIENNHAP));
+
+                tongTien = checked((int)tong);
+            }
+            catch (OverflowException)
+            {
+                return 0;
+            }
+
+            using (SqlConnection conn = SqlServerHelper.GetConnection())
+            using (SqlTransaction tran = conn.BeginTransaction())
+            {
+                try
+                {
+                    const string sqlUpdate = @"
+                UPDATE PHIEUNHAP
+                SET TG = @tg,
+                    MNCC = @mncc,
+                    TIEN = @tien
+                WHERE MPN = @mpn AND TT = 2";
+
+                    using (SqlCommand cmd =
+                        new SqlCommand(sqlUpdate, conn, tran))
+                    {
+                        cmd.Parameters.Add("@tg", SqlDbType.DateTime)
+                            .Value = phieu.TG;
+                        cmd.Parameters.Add("@mncc", SqlDbType.Int)
+                            .Value = phieu.MNCC;
+                        cmd.Parameters.Add("@tien", SqlDbType.Int)
+                            .Value = tongTien;
+                        cmd.Parameters.Add("@mpn", SqlDbType.Int)
+                            .Value = phieu.MPN;
+
+                        if (cmd.ExecuteNonQuery() != 1)
+                        {
+                            tran.Rollback();
+                            return 0;
+                        }
+                    }
+
+                    const string sqlDelete = @"
+                DELETE FROM CTPHIEUNHAP
+                WHERE MPN = @mpn";
+
+                    using (SqlCommand cmd =
+                        new SqlCommand(sqlDelete, conn, tran))
+                    {
+                        cmd.Parameters.Add("@mpn", SqlDbType.Int)
+                            .Value = phieu.MPN;
+                        cmd.ExecuteNonQuery();
+                    }
+
+                    const string sqlInsert = @"
+                INSERT INTO CTPHIEUNHAP
+                    (MPN, MSP, SL, TIENNHAP, HINHTHUC)
+                VALUES
+                    (@mpn, @msp, @sl, @tiennhap, @hinhthuc)";
+
+                    foreach (var item in chiTiet)
+                    {
+                        using (SqlCommand cmd =
+                            new SqlCommand(sqlInsert, conn, tran))
+                        {
+                            cmd.Parameters.Add("@mpn", SqlDbType.Int)
+                                .Value = phieu.MPN;
+                            cmd.Parameters.Add("@msp", SqlDbType.Int)
+                                .Value = item.MSP;
+                            cmd.Parameters.Add("@sl", SqlDbType.Int)
+                                .Value = item.SL;
+                            cmd.Parameters.Add("@tiennhap", SqlDbType.Int)
+                                .Value = item.TIENNHAP;
+                            cmd.Parameters.Add("@hinhthuc", SqlDbType.Int)
+                                .Value = item.HINHTHUC;
+
+                            if (cmd.ExecuteNonQuery() != 1)
+                                throw new InvalidOperationException(
+                                    "Không lưu được chi tiết phiếu nhập.");
+                        }
+                    }
+
+                    tran.Commit();
+                    return 1;
+                }
+                catch (Exception ex)
+                {
+                    try { tran.Rollback(); }
+                    catch { }
+
+                    Console.WriteLine(
+                        "Lỗi UpdateWithDetails: " + ex.Message);
+
+                    return 0;
+                }
+            }
+        }
+
     }
 }

@@ -64,51 +64,53 @@ namespace src.BUS
         }
 
         // Thêm phiếu nhập và chi tiết
-        public int Add(PhieuNhapDTO phieu, List<ChiTietPhieuNhapDTO> ctPhieu)
+
+        public int Add(
+            PhieuNhapDTO phieu,
+            List<ChiTietPhieuNhapDTO> ctPhieu)
         {
-            int newMPN = phieunhapDAO.insert(phieu);
-            if (newMPN > 0)
-            {
-                phieu.MPN = newMPN;
-                // LINQ: Cập nhật mã phiếu cho chi tiết
-                ctPhieu.ForEach(item => item.MPN = newMPN);
+            int newMPN = phieunhapDAO.CreateWithDetails(phieu, ctPhieu);
 
-                bool check = ctPhieuNhapDAO.insert(ctPhieu) != 0;
+            if (newMPN <= 0)
+                return 0;
 
-                if (check)
-                {
-                    listPhieuNhap.Add(phieu);
-                    return newMPN;
-                }
-            }
-            return 0;
+            phieu.MPN = newMPN;
+            phieu.TT = 2;
+            phieu.TIEN = checked((int)GetTIEN(ctPhieu));
+
+            ctPhieu.ForEach(item => item.MPN = newMPN);
+
+            listPhieuNhap.Add(phieu);
+
+            return newMPN;
         }
 
+
         // Update phiếu nhập và chi tiết
-        public int Update(PhieuNhapDTO phieu, List<ChiTietPhieuNhapDTO> ctPhieu)
+
+        public int Update(
+            PhieuNhapDTO phieu,
+            List<ChiTietPhieuNhapDTO> ctPhieu)
         {
             if (!CanUpdate(phieu.MPN))
-            {
-                Console.WriteLine("Không thể sửa phiếu nhập đã duyệt (TT=1) hoặc đã xóa (TT=0)");
                 return 0;
-            }
 
-            int result = phieunhapDAO.update(phieu);
+            int result = phieunhapDAO.UpdateWithDetails(
+                phieu, ctPhieu);
+
             if (result > 0)
             {
-                ctPhieuNhapDAO.delete(phieu.MPN.ToString());
+                phieu.TIEN = (int)GetTIEN(ctPhieu);
 
-                // LINQ: Cập nhật mã phiếu cho chi tiết
                 ctPhieu.ForEach(item => item.MPN = phieu.MPN);
-                ctPhieuNhapDAO.insert(ctPhieu);
 
-                // LINQ: Cập nhật cache
-                int index = listPhieuNhap.FindIndex(x => x.MPN == phieu.MPN);
+                int index = listPhieuNhap.FindIndex(
+                    x => x.MPN == phieu.MPN);
+
                 if (index >= 0)
-                {
                     listPhieuNhap[index] = phieu;
-                }
             }
+
             return result;
         }
 

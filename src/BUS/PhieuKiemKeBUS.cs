@@ -40,19 +40,21 @@ namespace src.BUS
             => listPhieuKiemKe.FirstOrDefault(phieu => phieu.MPKK == mpkk);
 
         // Thêm phiếu kiểm kê và chi tiết
-        public bool Add(PhieuKiemKeDTO phieu, List<ChiTietPhieuKiemKeDTO> dsPhieu)
+        public bool Add(
+    PhieuKiemKeDTO phieu,
+    List<ChiTietPhieuKiemKeDTO> dsPhieu)
         {
-            bool check = phieuKiemKeDAO.insert(phieu) != 0;
-            if (check)
-            {
-                // LINQ: Cập nhật Mã phiếu kiểm kê cho danh sách chi tiết
-                dsPhieu.ForEach(item => item.MPKK = phieu.MPKK);
+            int newId = phieuKiemKeDAO.CreateWithDetails(phieu, dsPhieu);
 
-                check = chiTietKiemKeDAO.insert(dsPhieu) != 0;
+            if (newId <= 0)
+                return false;
 
-                if (check) listPhieuKiemKe.Add(phieu); // Reload để đồng bộ
-            }
-            return check;
+            phieu.MPKK = newId;
+            phieu.TT = 2;
+            dsPhieu.ForEach(x => x.MPKK = newId);
+
+            LoadData();
+            return true;
         }
 
         // Lấy chi tiết phiếu kiểm kê
@@ -63,33 +65,34 @@ namespace src.BUS
         }
 
         // Cập nhật phiếu kiểm kê và chi tiết (chỉ cho phép sửa phiếu chờ duyệt TT=2)
-        public bool Update(PhieuKiemKeDTO phieu, List<ChiTietPhieuKiemKeDTO> dsPhieu)
+        public bool Update(
+    PhieuKiemKeDTO phieu,
+    List<ChiTietPhieuKiemKeDTO> dsPhieu)
         {
             if (!CanUpdate(phieu.MPKK))
-            {
                 return false;
+
+            bool result = phieuKiemKeDAO.UpdateWithDetails(phieu, dsPhieu);
+
+            if (result)
+            {
+                dsPhieu.ForEach(x => x.MPKK = phieu.MPKK);
+                LoadData();
             }
 
-            // Xóa chi tiết cũ
-            chiTietKiemKeDAO.delete(phieu.MPKK.ToString());
-
-            // LINQ: Cập nhật MPKK cho các chi tiết mới
-            dsPhieu.ForEach(item => item.MPKK = phieu.MPKK);
-
-            // Thêm chi tiết mới
-            return chiTietKiemKeDAO.insert(dsPhieu) != 0;
+            return result;
         }
 
         // Hủy phiếu kiểm kê (xóa mềm - UPDATE TT=0)
         public bool Cancel(int mpkk)
         {
-            // Xóa chi tiết trước
-            chiTietKiemKeDAO.delete(mpkk.ToString());
+            if (!CanDelete(mpkk))
+                return false;
 
-            // Xóa phiếu (soft delete: UPDATE TT=0)
-            bool result = phieuKiemKeDAO.delete(mpkk.ToString()) > 0;
+            bool result = phieuKiemKeDAO.CancelWithDetails(mpkk);
 
-            if (result) LoadData(); // Reload để đồng bộ
+            if (result)
+                LoadData();
 
             return result;
         }
