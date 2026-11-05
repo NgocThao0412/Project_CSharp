@@ -200,7 +200,7 @@ namespace src.DAO
         }
 
         // 5. Lấy phiếu theo mã
-        public PhieuXuatDTO selectById(string t)
+        public PhieuXuatDTO? selectById(string t)
         {
             if (!int.TryParse(t, out int mpx))
                 return null;

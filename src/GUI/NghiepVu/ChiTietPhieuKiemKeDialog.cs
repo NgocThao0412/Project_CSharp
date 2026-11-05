@@ -204,11 +204,14 @@ namespace src.GUI.NghiepVu
 
                 if (mode != DialogMode.Add && maphieu.HasValue)
                 {
-                    PhieuKiemKeDTO phieu = phieuKiemKeBUS.GetById(maphieu.Value);
+                    PhieuKiemKeDTO? phieu = phieuKiemKeBUS.GetById(maphieu.Value);
                     if (phieu != null)
                     {
                         txtMaPhieu.Text = phieu.MPKK.ToString();
-                        cboNhanVien.SelectedValue = phieu.MNV;
+                        if (cboNhanVien != null)
+                        {
+                            cboNhanVien.SelectedValue = phieu.MNV;
+                        }
                         dtpThoiGian.Value = phieu.TG;
                         txtTrangThai.Text = phieu.TT == 1 ? "Đã duyệt" : (phieu.TT == 2 ? "Chờ duyệt" : "Đã xóa");
 
@@ -264,7 +267,7 @@ namespace src.GUI.NghiepVu
                     if (row.Cells["ChenhLech"].Value != null)
                     {
                         int cl = 0;
-                        int.TryParse(row.Cells["ChenhLech"].Value.ToString(), out cl);
+                        int.TryParse(row.Cells["ChenhLech"].Value?.ToString(), out cl);
                         if (cl < 0)
                         {
                             row.Cells["ChenhLech"].Style.ForeColor = Color.Red;
@@ -379,11 +382,23 @@ namespace src.GUI.NghiepVu
             }
         }
 
-        private void DgvChiTiet_CellEnter(object sender, DataGridViewCellEventArgs e)
+        private void DgvChiTiet_CellEnter(
+    object sender,
+    DataGridViewCellEventArgs e)
         {
-            if (dgvChiTiet.Columns.Contains("SoLuongThucTe") && e.ColumnIndex == dgvChiTiet.Columns["SoLuongThucTe"].Index)
+            if (e.RowIndex < 0 ||
+                e.ColumnIndex < 0 ||
+                e.RowIndex >= dgvChiTiet.Rows.Count ||
+                e.ColumnIndex >= dgvChiTiet.Columns.Count)
             {
-                dgvChiTiet.Rows[e.RowIndex].Cells[e.ColumnIndex].ToolTipText = "Nhập số lượng kiểm đếm thực tế tại đây";
+                return;
+            }
+
+            if (dgvChiTiet.Columns[e.ColumnIndex].Name == "SoLuongThucTe")
+            {
+                dgvChiTiet.Rows[e.RowIndex]
+                    .Cells[e.ColumnIndex].ToolTipText =
+                        "Nhập số lượng kiểm đếm thực tế tại đây";
             }
         }
 
@@ -417,9 +432,20 @@ namespace src.GUI.NghiepVu
                     return;
                 }
 
+                if (cboNhanVien.SelectedValue == null ||
+    !int.TryParse(cboNhanVien.SelectedValue.ToString(), out int maNhanVien))
+                {
+                    MessageBox.Show(
+                        "Vui lòng chọn nhân viên hợp lệ!",
+                        "Cảnh báo",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Warning);
+                    return;
+                }
+
                 PhieuKiemKeDTO phieu = new PhieuKiemKeDTO
                 {
-                    MNV = (int)cboNhanVien.SelectedValue,
+                    MNV = maNhanVien,
                     TG = dtpThoiGian.Value,
                     TT = 2
                 };
@@ -432,6 +458,16 @@ namespace src.GUI.NghiepVu
                 }
                 else if (mode == DialogMode.Edit)
                 {
+                    if (!maphieu.HasValue)
+                    {
+                        MessageBox.Show(
+                            "Không xác định được mã phiếu kiểm kê!",
+                            "Lỗi",
+                            MessageBoxButtons.OK,
+                            MessageBoxIcon.Error);
+                        return;
+                    }
+
                     phieu.MPKK = maphieu.Value;
                     success = phieuKiemKeBUS.Update(phieu, danhSachChiTiet);
                 }

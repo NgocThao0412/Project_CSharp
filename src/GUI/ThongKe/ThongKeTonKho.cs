@@ -159,15 +159,28 @@ namespace src.GUI.ThongKe
             tblTonKho.Columns.Add("TonCuoi", "Tồn cuối kỳ");
 
             // Format cột
-            tblTonKho.Columns["STT"].Width = 10;
-            tblTonKho.Columns["MaSP"].Width = 15;
-            tblTonKho.Columns["TenSP"].Width = 50;
-            tblTonKho.Columns["STT"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
-            tblTonKho.Columns["MaSP"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
-            tblTonKho.Columns["TonDau"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
-            tblTonKho.Columns["Nhap"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
-            tblTonKho.Columns["Xuat"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
-            tblTonKho.Columns["TonCuoi"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+            // Format cột
+            tblTonKho.Columns["STT"]!.Width = 50;
+            tblTonKho.Columns["MaSP"]!.Width = 80;
+            tblTonKho.Columns["TenSP"]!.Width = 250;
+
+            tblTonKho.Columns["STT"]!.DefaultCellStyle.Alignment =
+                DataGridViewContentAlignment.MiddleCenter;
+
+            tblTonKho.Columns["MaSP"]!.DefaultCellStyle.Alignment =
+                DataGridViewContentAlignment.MiddleCenter;
+
+            tblTonKho.Columns["TonDau"]!.DefaultCellStyle.Alignment =
+                DataGridViewContentAlignment.MiddleCenter;
+
+            tblTonKho.Columns["Nhap"]!.DefaultCellStyle.Alignment =
+                DataGridViewContentAlignment.MiddleCenter;
+
+            tblTonKho.Columns["Xuat"]!.DefaultCellStyle.Alignment =
+                DataGridViewContentAlignment.MiddleCenter;
+
+            tblTonKho.Columns["TonCuoi"]!.DefaultCellStyle.Alignment =
+                DataGridViewContentAlignment.MiddleCenter;
 
             pnlCenter.Controls.Add(tblTonKho);
             this.Controls.Add(pnlCenter);
