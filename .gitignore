@@ -1,0 +1,15 @@
+# Visual Studio
+.vs/
+**/.vs/
+**/bin/
+**/obj/
+*.csproj.user
+*.suo
+*.user
+
+# Local configuration and secrets
+appsettings.Development.json
+.env
+.env.***/bin/
+**/obj/
+**/.vs/
