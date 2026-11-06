@@ -1,0 +1,33 @@
+@model Catalog.Web.Features.Hao.HaoRegisterInput
+@{
+    Layout = "~/Views/Shared/_HaoLayout.cshtml";
+    ViewData["Title"] = "Đăng ký";
+}
+<div class="hao-auth-width mx-auto">
+    <div class="card hao-card"><div class="card-body p-4 p-lg-5">
+        <div class="hao-eyebrow mb-2">TÀI KHOẢN KHÁCH HÀNG</div>
+        <h1 class="h2 fw-bold mb-2">Tạo tài khoản</h1>
+        <p class="text-secondary small mb-4">Dùng tài khoản để theo dõi những đơn đã đặt khi đăng nhập.</p>
+        <form method="post" action="/tai-khoan/dang-ky">
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true, "", new { @class = "text-danger small mb-3" })
+            <div class="mb-3"><label class="form-label fw-semibold" for="hao-register-name">Họ và tên</label>
+                <input class="form-control" id="hao-register-name" name="Name" value="@Model.Name" maxlength="100" autocomplete="name" required />
+                @Html.ValidationMessage("Name", null, new { @class = "text-danger small" })</div>
+            <div class="mb-3"><label class="form-label fw-semibold" for="hao-register-email">Email</label>
+                <input class="form-control" id="hao-register-email" name="Email" type="email" value="@Model.Email" maxlength="150" autocomplete="email" required />
+                @Html.ValidationMessage("Email", null, new { @class = "text-danger small" })</div>
+            <div class="mb-3"><label class="form-label fw-semibold" for="hao-register-password">Mật khẩu</label>
+                <input class="form-control" id="hao-register-password" name="Password" type="password" autocomplete="new-password" minlength="8" required />
+                @Html.ValidationMessage("Password", null, new { @class = "text-danger small" })
+                <div class="form-text">Ít nhất 8 ký tự.</div></div>
+            <div class="mb-4"><label class="form-label fw-semibold" for="hao-register-confirm">Xác nhận mật khẩu</label>
+                <input class="form-control" id="hao-register-confirm" name="ConfirmPassword" type="password" autocomplete="new-password" minlength="8" required />
+                @Html.ValidationMessage("ConfirmPassword", null, new { @class = "text-danger small" })</div>
+            <button class="btn btn-primary w-100 py-2 fw-semibold" type="submit">Đăng ký</button>
+        </form>
+        <hr class="my-4" />
+        <p class="text-center small mb-0">Đã có tài khoản? <a href="/tai-khoan/dang-nhap">Đăng nhập</a></p>
+        <p class="small text-secondary text-center mt-2 mb-0">Tài khoản demo sẽ mất khi dừng server.</p>
+    </div></div>
+</div>
