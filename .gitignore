@@ -10,4 +10,6 @@
 # Local configuration and secrets
 appsettings.Development.json
 .env
-.env.*
+.env.***/bin/
+**/obj/
+**/.vs/
