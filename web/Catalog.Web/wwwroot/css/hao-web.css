@@ -1,0 +1,35 @@
+/* Chỉ áp dụng cho _HaoLayout.cshtml; không sửa CSS, header của Ny. */
+.hao-page{background:#f5f8fb;color:#243246;font-family:system-ui,-apple-system,"Segoe UI",Arial,sans-serif}
+.hao-page .hao-navbar{background:#146b98}
+.hao-page .hao-navbar .navbar-brand{font-size:1rem;letter-spacing:.2px}
+.hao-page .hao-navbar .nav-link{font-size:.925rem;color:rgba(255,255,255,.88)}
+.hao-page .hao-navbar .nav-link:hover,.hao-page .hao-navbar .nav-link:focus{color:#fff}
+.hao-page .hao-account-name{font-size:.88rem;color:#fff;max-width:135px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hao-page .hao-demo-notice{background:#fff1d6;color:#755319;font-size:.8rem;border-bottom:1px solid #f0ddb8}
+.hao-page .hao-eyebrow{font-weight:750;color:#16709f;letter-spacing:1.3px;font-size:.73rem}
+.hao-page .hao-card{border:1px solid #e1e9ef;box-shadow:0 8px 28px rgba(24,59,81,.045);border-radius:14px}
+.hao-page .hao-card .card-body{min-width:0}
+.hao-page .hao-price{color:#0b6695}
+.hao-page .btn-primary{background-color:#166f9d;border-color:#166f9d}
+.hao-page .btn-primary:hover,.hao-page .btn-primary:focus{background-color:#0e5b82;border-color:#0e5b82}
+.hao-page .btn-outline-primary{color:#166f9d;border-color:#a9ccdF}
+.hao-page .btn-outline-primary:hover{background:#166f9d;color:#fff;border-color:#166f9d}
+.hao-page .hao-table thead th{font-weight:700;font-size:.85rem;color:#64758a;white-space:nowrap;padding:1rem}
+.hao-page .hao-table td{padding:1rem;vertical-align:middle;font-size:.91rem}
+.hao-page .hao-table tbody tr:last-child td{border-bottom:0}
+.hao-page .hao-qty{width:75px;min-width:75px;max-width:80px}
+.hao-page .hao-empty-symbol{font-size:3.2rem;line-height:1.2;margin-bottom:1rem}
+.hao-page .hao-complete{max-width:670px;margin-top:1rem}
+.hao-page .hao-success-icon{width:64px;height:64px;border-radius:100%;display:grid;place-items:center;background:#dff7e9;color:#198754;font-size:2.4rem;font-weight:800}
+.hao-page .hao-copy-row{display:flex;justify-content:space-between;gap:20px;align-items:center;padding:1rem 0;text-align:left;border-bottom:1px solid #e4ebf1}
+.hao-page .hao-copy-row:last-of-type{border-bottom:0}
+.hao-page .hao-copy-row>span{font-size:.9rem;color:#5d7186}
+.hao-page .hao-copy-row>strong,.hao-page .hao-copy-row>code{font-size:1rem;font-weight:750;color:#166f9d;word-break:break-word}
+.hao-page .hao-details dt{font-weight:600;color:#64758a}
+.hao-page .hao-total{background:#eaf5fb;border-radius:9px}
+.hao-page .hao-total strong{color:#0c638f;font-size:1.25rem}
+.hao-page .hao-auth-width{max-width:500px}
+.hao-page .hao-product-placeholder{background:linear-gradient(125deg,#dceefa,#edf8ff);display:grid;place-items:center;min-height:135px;font-size:.72rem;letter-spacing:2px;color:#6f9fba;font-weight:750}
+.hao-page .hao-footer{color:#607589;background:#fff;border-top:1px solid #e1e9ef}
+.hao-page .form-control:focus{border-color:#5ea6cc;box-shadow:0 0 0 .22rem rgba(22,111,157,.14)}
+@media(max-width:767px){.hao-page .hao-copy-row{flex-direction:column;align-items:flex-start;gap:4px}.hao-page .hao-table td{padding:.8rem}.hao-page .hao-brand{max-width:270px}}
