@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
-import { money } from '../api.js';
-import { getProductImage, onProductImageError } from '../utils/productImages.js';
-import ShopIcon from './ShopIcon.jsx';
+import { money } from '../../API/GoiAPI.js';
+import { getProductImage, onProductImageError } from '../../config/HinhAnhSanPham.js';
+import ShopIcon from './BieuTuongCuaHang.jsx';
 
 const IMAGES = '/images/catalog/';
 

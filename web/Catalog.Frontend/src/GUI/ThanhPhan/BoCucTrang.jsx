@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import ShopIcon from './ShopIcon.jsx';
+import ShopIcon from './BieuTuongCuaHang.jsx';
 
 const backendBase = import.meta.env.DEV ? 'http://localhost:5080' : '';
 

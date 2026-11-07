@@ -1,11 +1,11 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import SiteLayout from './components/SiteLayout.jsx';
-import HomePage from './pages/HomePage.jsx';
-import ProductsPage from './pages/ProductsPage.jsx';
-import ProductDetailsPage from './pages/ProductDetailsPage.jsx';
-import NotFoundPage from './pages/NotFoundPage.jsx';
+import SiteLayout from './GUI/ThanhPhan/BoCucTrang.jsx';
+import HomePage from './GUI/TrangChu.jsx';
+import ProductsPage from './GUI/DanhSachSanPham.jsx';
+import ProductDetailsPage from './GUI/ChiTietSanPham.jsx';
+import NotFoundPage from './GUI/KhongTimThay.jsx';
 import './site.css';
 
 createRoot(document.getElementById('root')).render(

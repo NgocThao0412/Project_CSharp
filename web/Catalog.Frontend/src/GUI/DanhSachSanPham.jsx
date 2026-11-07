@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
-import { useApi } from '../api.js';
-import ProductCard from '../components/ProductCard.jsx';
-import LoadState from '../components/LoadState.jsx';
-import ShopIcon from '../components/ShopIcon.jsx';
+import { useApi } from '../API/GoiAPI.js';
+import ProductCard from './ThanhPhan/TheSanPham.jsx';
+import LoadState from './ThanhPhan/TrangThaiTaiDuLieu.jsx';
+import ShopIcon from './ThanhPhan/BieuTuongCuaHang.jsx';
 
 
 // Adapt the existing paginated C# API to the four cards per page in the design,

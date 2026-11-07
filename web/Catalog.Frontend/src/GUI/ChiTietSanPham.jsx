@@ -1,7 +1,7 @@
 import { Link, useParams } from 'react-router-dom';
-import { money, useApi } from '../api.js';
-import LoadState from '../components/LoadState.jsx';
-import { getProductImage, onProductImageError } from '../utils/productImages.js';
+import { money, useApi } from '../API/GoiAPI.js';
+import LoadState from './ThanhPhan/TrangThaiTaiDuLieu.jsx';
+import { getProductImage, onProductImageError } from '../config/HinhAnhSanPham.js';
 
 export default function ProductDetailsPage() {
   const { id } = useParams();

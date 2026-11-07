@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
-import { useApi } from '../api.js';
-import ProductCard from '../components/ProductCard.jsx';
-import LoadState from '../components/LoadState.jsx';
+import { useApi } from '../API/GoiAPI.js';
+import ProductCard from './ThanhPhan/TheSanPham.jsx';
+import LoadState from './ThanhPhan/TrangThaiTaiDuLieu.jsx';
 
 function BenefitIcon({ name }) {
   const shared = { width: 45, height: 45, viewBox: '0 0 48 48', fill: 'none', stroke: 'currentColor',
