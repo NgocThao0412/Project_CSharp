@@ -7,7 +7,11 @@ async function goi(url, method = 'GET', data = null) {
   });
   const result = await response.json().catch(() => null);
   if (!response.ok) {
-    throw new Error(result?.message || result?.detail || `Không xử lý được yêu cầu (HTTP ${response.status}).`);
+    const invalidField = result?.errors && Object.values(result.errors).flat().find(Boolean);
+    throw new Error(result?.message || result?.detail || invalidField || `Không xử lý được yêu cầu (HTTP ${response.status}).`);
+  }
+  if ((url.startsWith('/api/gio-hang') && method !== 'GET') || url === '/api/don-hang/dat') {
+    window.dispatchEvent(new Event('gio-hang:changed'));
   }
   return result;
 }
@@ -21,3 +25,6 @@ export const xoaGioHang = productId =>
   goi('/api/gio-hang/xoa', 'POST', { productId });
 export const traCuuDonHang = (maDon, soDienThoai) =>
   goi('/api/don-hang/tra-cuu', 'POST', { maDon: Number(maDon), soDienThoai });
+
+// Yeu cau gui chi thong tin nguoi nhan. San pham/gia lay tu Session va SQL o C#.
+export const datHang = thongTin => goi('/api/don-hang/dat', 'POST', thongTin);

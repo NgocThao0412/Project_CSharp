@@ -52,7 +52,7 @@ export default function ProductCard({ product, variant = 'standard', onAddToCart
         </div>
         <div className="catalog-card-actions">
           <button type="button" className="catalog-cart-button" disabled={!isAvailable}
-            title={isAvailable ? 'Tính năng giỏ hàng đang được kết nối với Web C#' : 'Sản phẩm tạm hết hàng'}
+            title={isAvailable ? 'Thêm sản phẩm vào giỏ hàng' : 'Sản phẩm tạm hết hàng'}
             onClick={() => onAddToCart?.(product)}>
             <ShopIcon name="cart" size={17} /> Thêm vào giỏ
           </button>

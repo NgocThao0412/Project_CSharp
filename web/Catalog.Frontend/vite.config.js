@@ -12,7 +12,8 @@ export default defineConfig({
     },
   },
   build: {
-    outDir: 'dist',
-    emptyOutDir: true,
+    outDir: '../Catalog.Web/wwwroot',
+    // Khong xoa images/ do C# va React dang dung chung.
+    emptyOutDir: false,
   },
 });

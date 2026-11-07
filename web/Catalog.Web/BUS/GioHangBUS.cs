@@ -30,6 +30,10 @@ public sealed class GioHangBUS(IHttpContextAccessor truyCap, ISanPhamDAO sanPham
 
     private void Luu(List<MucGioHangDTO> gio) => Phien.SetString(Khoa, JsonSerializer.Serialize(gio));
 
+    // Session la nguon du lieu gio hang duoc may chu tin cay khi tao don.
+    public IReadOnlyList<MucGioHangDTO> LayMucDaChon() => Doc();
+    public void XoaSauDatHang() => Phien.Remove(Khoa);
+
     public async Task<string?> ThemAsync(int ma, int soLuong, CancellationToken ct = default)
     {
         if (ma <= 0 || soLuong is < 1 or > 99) return "Số lượng không hợp lệ.";

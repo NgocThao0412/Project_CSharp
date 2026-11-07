@@ -1,50 +1,41 @@
-# Catalog Frontend (React)
+# React + JSX (giao diện khách hàng)
 
-Đây là bản chuyển trực tiếp từ Razor Views sang React của project `Catalog.Web`.
-**Không thiết kế lại giao diện**: sử dụng nguyên CSS `src/site.css` và giữ đúng
-các class HTML, nội dung, bố cục, header tìm kiếm nhỏ cạnh Trang chủ, banner
-không có form tìm kiếm lớn.
+Web đồ án dùng **React cho giao diện** và **C# ASP.NET Core cho API**. Không sử dụng Razor `.cshtml`.
 
-## Chạy trên GitHub Codespaces
+- `src/GUI/*.jsx`: Trang chủ, danh sách/chi tiết sản phẩm, giỏ hàng, tài khoản, tra cứu đơn hàng.
+- `src/API/*.js`: gọi `/api/*` của C# bằng `fetch`.
+- `src/site.css`, `src/product-images.css`: CSS giao diện.
+- `vite.config.js`: proxy `/api` tới `http://127.0.0.1:5080` khi chạy dev.
 
-Terminal 1 — C# API (chỉ dùng module `web/Catalog.Web`):
+## Chạy trên máy (Windows PowerShell)
 
-```sh
-dotnet run --project web/Catalog.Web/Catalog.Web.csproj --urls http://0.0.0.0:5080
+Mở hai Terminal tại thư mục gốc `Project_CSharp`.
+
+**Terminal 1:**
+
+```powershell
+dotnet run --project web\Catalog.Web\Catalog.Web.csproj --urls http://127.0.0.1:5080
 ```
 
-Terminal 2 — React + Vite:
+**Terminal 2:**
 
-```sh
-cd web/Catalog.Frontend
-npm install
-npm run dev
+```powershell
+cd web\Catalog.Frontend
+npm.cmd ci
+npm.cmd run dev
 ```
 
-Mở cổng **5173** ở tab PORTS. Vite proxy `/api` sang API chạy ở 5080.
+Mở **http://localhost:5173/**.
 
-## Địa chỉ
+## Đóng gói React cho ASP.NET Core
 
-- `/` — Trang chủ
-- `/san-pham` — Danh sách và lọc danh mục
-- `/san-pham/1` — Chi tiết sản phẩm
-- `/tim-kiem?q=ram` — Tìm kiếm qua header
-
-Dữ liệu hiện theo cấu hình `Catalog:UseDemoData` ở `Catalog.Web/appsettings.json`.
-Khi SQL Server thật sẵn sàng, backend đổi cờ và cấu hình đúng view/connection string;
-React không phải thay đổi giao diện.
-
-## Build frontend
-
-```sh
-cd web/Catalog.Frontend
-npm run build
+```powershell
+cd web\Catalog.Frontend
+npm.cmd run build
 ```
 
-Vite sẽ build frontend vào `web/Catalog.Web/wwwroot` để ASP.NET Core có thể phục vụ
-React trên cùng một cổng. KHÔNG commit `node_modules`, `dist` hay file `bin/obj`.
+Lệnh này tạo trang React vào `../Catalog.Web/wwwroot` (không xóa `images/`). Sau đó chạy backend tại cổng 5080 và mở **http://127.0.0.1:5080/** để dùng React + API C# cùng một cổng.
 
-## Lưu ý tích hợp
+> Sản phẩm, danh mục và tồn kho được lấy từ `dbo.vw_Catalog` trong SQL Server; không có chế độ demo khi không kết nối CSDL. Đăng nhập/đăng ký và đặt hàng trực tuyến vẫn chưa có API xác thực/tạo đơn trong nguồn gốc, vì vậy các nút submit chưa được bật.
 
-Không tự ý giải nén đè lên các phần Web giỏ hàng/đặt hàng của thành viên khác.
-Các phần ngoài `web/` (desktop, cơ sở dữ liệu) không nằm trong ZIP này.
+Xem thêm [hướng dẫn Web tổng thể](../../HUONG_DAN_WEB_REACT_CSHARP.md).

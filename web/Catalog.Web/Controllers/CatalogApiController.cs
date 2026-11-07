@@ -1,4 +1,4 @@
-using Catalog.Web.DAO;
+using Catalog.Web.BUS;
 using Catalog.Web.DTO;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
@@ -7,7 +7,7 @@ namespace Catalog.Web.Controllers;
 
 [ApiController]
 [Route("api/catalog")]
-public sealed class CatalogApiController(ISanPhamDAO sanPham, ILogger<CatalogApiController> log) : ControllerBase
+public sealed class CatalogApiController(SanPhamBUS sanPham, ILogger<CatalogApiController> log) : ControllerBase
 {
     private static object DinhDang(SanPhamDTO sp) => new
     {
@@ -49,11 +49,11 @@ public sealed class CatalogApiController(ISanPhamDAO sanPham, ILogger<CatalogApi
 
     [HttpGet("products")]
     public async Task<IActionResult> DanhSach([FromQuery] string? q, [FromQuery] string? category,
-        [FromQuery] int page = 1, CancellationToken ct = default)
+        [FromQuery] int page = 1, [FromQuery] string? sort = null, CancellationToken ct = default)
     {
         try
         {
-            var ketQua = await sanPham.TimAsync(new TimKiemSanPhamDTO(q, category, page), ct);
+            var ketQua = await sanPham.TimAsync(q, category, page, sort, ct);
             return Ok(new
             {
                 items = ketQua.SanPham.Select(DinhDang),

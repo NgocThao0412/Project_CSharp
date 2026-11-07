@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import ShopIcon from './BieuTuongCuaHang.jsx';
+import { layGioHang } from '../../API/GioHangAPI.js';
 
 
 function ShopLogo() {
@@ -16,12 +17,25 @@ export default function SiteLayout() {
   const location = useLocation();
   const query = new URLSearchParams(location.search).get('q') ?? '';
   const [keyword, setKeyword] = useState(query);
+  const [cartCount, setCartCount] = useState(0);
   const isCatalog = location.pathname.startsWith('/san-pham') || location.pathname.startsWith('/tim-kiem');
 
   useEffect(() => setKeyword(query), [query]);
   useEffect(() => {
+    let active = true;
+    function refresh() {
+      layGioHang().then(gio => {
+        if (active) setCartCount((gio.items ?? []).reduce((sum, item) => sum + item.quantity, 0));
+      }).catch(() => { /* Trang chu van su dung duoc neu API dang tam loi. */ });
+    }
+    refresh();
+    window.addEventListener('gio-hang:changed', refresh);
+    return () => { active = false; window.removeEventListener('gio-hang:changed', refresh); };
+  }, []);
+  useEffect(() => {
     const title = location.pathname.startsWith('/san-pham/') ? 'Chi tiết sản phẩm'
       : isCatalog ? 'Sản phẩm' : location.pathname === '/gio-hang' ? 'Giỏ hàng'
+      : location.pathname.startsWith('/dat-hang') ? 'Đặt hàng'
       : location.pathname.startsWith('/tai-khoan/') ? 'Tài khoản'
       : location.pathname.startsWith('/don-hang/') ? 'Tra cứu đơn hàng' : 'Trang chủ';
     document.title = `${title} - Cửa hàng linh kiện máy tính`;
@@ -56,6 +70,7 @@ export default function SiteLayout() {
           <Link to="/don-hang/tra-cuu" className="shop-order-link">Tra cứu đơn</Link>
           <Link to="/gio-hang" className="shop-action-icon" title="Giỏ hàng" aria-label="Giỏ hàng">
             <ShopIcon name="cart" size={26} />
+            {cartCount > 0 && <span className="web-cart-count" aria-label={`${cartCount} sản phẩm trong giỏ`}>{cartCount > 99 ? '99+' : cartCount}</span>}
           </Link>
           <Link to="/tai-khoan/dang-nhap" className="shop-action-icon" title="Đăng nhập" aria-label="Tài khoản">
             <ShopIcon name="user" size={26} />

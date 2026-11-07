@@ -19,7 +19,10 @@ builder.Services.AddSession(options =>
 builder.Services.AddScoped<KetNoi>();
 builder.Services.AddScoped<ISanPhamDAO, SanPhamSqlDAO>();
 builder.Services.AddScoped<DonHangDAO>();
+builder.Services.AddScoped<DatHangDAO>();
 builder.Services.AddScoped<GioHangBUS>();
+builder.Services.AddScoped<DatHangBUS>();
+builder.Services.AddScoped<SanPhamBUS>();
 
 var app = builder.Build();
 
@@ -28,9 +31,14 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
+// Neu da chay "npm run build", React SPA duoc phuc vu tu wwwroot.
+app.UseDefaultFiles();
 app.UseStaticFiles();
 app.UseRouting();
 app.UseSession();
 app.MapControllers();
+// Cho phep refresh cac URL cua React Router (vd: /san-pham/12).
+// Khong can Razor / .cshtml: API C# va giao dien React la hai phan rieng.
+app.MapFallbackToFile("index.html");
 
 app.Run();

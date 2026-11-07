@@ -66,8 +66,10 @@ export default function GioHang() {
       <aside className="web-cart-summary">
         <h2>Tóm tắt giỏ hàng</h2>
         <div className="web-summary-line"><span>Tổng cộng</span><strong>{money(gio.total)}</strong></div>
-        <p className="muted">Đặt hàng trực tuyến chưa được bật: nhóm cần thống nhất tài khoản khách hàng và quy trình ghi phiếu xuất trong SQL Server.</p>
-        <button className="web-primary" disabled type="button">Đặt hàng (chưa khả dụng)</button>
+        <p className="muted">Thanh toán khi nhận hàng (COD). Đơn sẽ được nhân viên kiểm tra và duyệt trước khi xuất kho.</p>
+        {gio.available
+          ? <Link className="web-primary" to="/dat-hang">Tiến hành đặt hàng</Link>
+          : <button className="web-primary" disabled type="button">Vui lòng cập nhật số lượng</button>}
         <Link to="/san-pham" className="web-secondary">Tiếp tục mua sắm</Link>
       </aside>
     </div>}
