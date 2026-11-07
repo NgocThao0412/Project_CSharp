@@ -8,7 +8,7 @@ import ShopIcon from './ThanhPhan/BieuTuongCuaHang.jsx';
 
 // Adapt the existing paginated C# API to the four cards per page in the design,
 // without changing the SQL backend or the other team's code.
-const CARDS_PER_PAGE = 4;
+const CARDS_PER_PAGE = 8;
 function useCatalogPage(q, category, requestedPage) {
   const [state, setState] = useState({ data: null, loading: true, error: null });
   useEffect(() => {
