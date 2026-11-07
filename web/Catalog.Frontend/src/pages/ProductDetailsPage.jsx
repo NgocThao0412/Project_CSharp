@@ -1,6 +1,7 @@
 import { Link, useParams } from 'react-router-dom';
 import { money, useApi } from '../api.js';
 import LoadState from '../components/LoadState.jsx';
+import { getProductImage, onProductImageError } from '../utils/productImages.js';
 
 export default function ProductDetailsPage() {
   const { id } = useParams();
@@ -13,7 +14,7 @@ export default function ProductDetailsPage() {
       <div className="breadcrumb"><Link to="/">Trang chủ</Link> / <Link to="/san-pham">Sản phẩm</Link> / {product.name}</div>
       <div className="detail-grid">
         <div className="detail-image">
-          {product.imageUrl ? <img src={product.imageUrl} alt={product.name} /> : <span aria-hidden="true">PC</span>}
+          <img src={getProductImage(product)} alt={product.name} onError={onProductImageError} />
         </div>
         <div className="detail-info">
           <div className="eyebrow blue">{product.category}</div>

@@ -33,3 +33,27 @@
 .hao-page .hao-footer{color:#607589;background:#fff;border-top:1px solid #e1e9ef}
 .hao-page .form-control:focus{border-color:#5ea6cc;box-shadow:0 0 0 .22rem rgba(22,111,157,.14)}
 @media(max-width:767px){.hao-page .hao-copy-row{flex-direction:column;align-items:flex-start;gap:4px}.hao-page .hao-table td{padding:.8rem}.hao-page .hao-brand{max-width:270px}}
+
+/* HAO UI V2 - scoped to MVC Hào; does not affect Ny's React CSS. */
+.hao-page{background:#f6f8fc;color:#1b2c42;font-family:Inter,"Segoe UI",Arial,sans-serif}
+.hao-page .hao-navbar{background:#fff;border-bottom:1px solid #e1eaf5;box-shadow:none!important}
+.hao-page .hao-navbar .navbar{padding-top:.65rem!important;padding-bottom:.65rem!important}
+.hao-page .hao-navbar .navbar-brand{display:inline-flex;align-items:center;gap:14px;color:#174a89;font-weight:700;font-size:14px;line-height:1.25}
+.hao-page .hao-brand-mark{display:inline-block;width:24px;height:24px;border:3px solid #288bdf;transform:rotate(45deg);position:relative;flex-shrink:0;margin:5px}
+.hao-page .hao-brand-mark::after{content:"";position:absolute;inset:3px;border:1.7px solid #288bdf}
+.hao-page .hao-brand-lines{display:flex;flex-direction:column;gap:2px;font-size:13px;white-space:nowrap}
+.hao-page .hao-brand-lines small{font-size:11px}
+.hao-page .hao-brand-lines strong{font-size:14px}
+.hao-page .hao-navbar .nav-link{color:#1b2c42;font-weight:600}
+.hao-page .hao-navbar .nav-link:hover{color:#1769e0}
+.hao-page .hao-navbar .navbar-toggler{border-color:#cddbea}
+.hao-page .hao-navbar .navbar-toggler-icon{filter:invert(0.65)}
+.hao-page .btn-primary{background:#1769e0;border-color:#1769e0;border-radius:8px}
+.hao-page .btn-outline-primary{color:#1769e0;border-color:#90b8ed;border-radius:8px}
+.hao-page .hao-eyebrow{color:#1769e0}
+.hao-page .hao-card{border-radius:15px;border:1px solid #e0e9f3;box-shadow:0 9px 30px rgba(19,49,89,.06)}
+.hao-page .form-control{border-radius:8px;border:1px solid #d2dfed}
+.hao-page .form-control:focus{border-color:#1769e0;box-shadow:0 0 0 .2rem rgba(23,105,224,.12)}
+.hao-page .hao-cart-thumb{width:74px;height:74px;object-fit:contain;background:#eef5fa;border-radius:9px;border:1px solid #e1eaf3;padding:5px;vertical-align:middle;margin-right:10px}
+.hao-page .hao-product-photo{display:block;width:100%;height:175px;object-fit:contain;background:#eef5fa;padding:14px}
+.hao-page .hao-footer{background:white;border-top:1px solid #e1eaf3}
