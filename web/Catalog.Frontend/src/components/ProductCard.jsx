@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { money } from '../api.js';
+import { getProductImage, onProductImageError } from '../utils/productImages.js';
 import ShopIcon from './ShopIcon.jsx';
 
 const IMAGES = '/images/catalog/';
@@ -36,7 +37,7 @@ export default function ProductCard({ product, variant = 'standard', onAddToCart
           <ShopIcon name="heart" size={21} />
         </button>
         <Link to={`/san-pham/${product.id}`} className="catalog-card-image-link" aria-label={`Xem ${product.name}`}>
-          <img src={productImage(product)} alt={product.name} loading="lazy" />
+          <img src={getProductImage(product, productImage(product))} alt={product.name} loading="lazy" onError={onProductImageError} />
         </Link>
       </div>
       <div className="catalog-card-body">
@@ -63,7 +64,7 @@ export default function ProductCard({ product, variant = 'standard', onAddToCart
 
   return <article className="product-card">
     <Link className="product-image" to={`/san-pham/${product.id}`} aria-label={`Xem ${product.name}`}>
-      {product.imageUrl ? <img src={product.imageUrl} alt={product.name} loading="lazy" /> : <span aria-hidden="true">PC</span>}
+      <img src={getProductImage(product, productImage(product))} alt={product.name} loading="lazy" onError={onProductImageError} />
     </Link>
     <div className="product-body">
       <div className="muted">{product.category} · {product.brand}</div>

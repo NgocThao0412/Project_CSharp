@@ -1,0 +1,5 @@
+/* Ảnh sản phẩm dùng chung cho React - không sửa site.css của Ny. */
+.product-image{overflow:hidden;letter-spacing:normal;background:#f2f7fc}
+.product-image img{display:block;width:100%;height:100%;object-fit:contain;padding:13px;background:transparent}
+.detail-image{overflow:hidden;letter-spacing:normal;background:#f2f7fc}
+.detail-image img{display:block;width:100%;height:100%;object-fit:contain;padding:28px;background:transparent}

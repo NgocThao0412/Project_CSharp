@@ -1,0 +1,302 @@
+{
+  "notes": "Product photos re-used from src/img_product/ supplied by this project. Illustration SVGs are explicitly generic and not brand/model photographs.",
+  "sqlProducts": [
+    {
+      "id": 3,
+      "name": "Chuột Logitech G502",
+      "file": "mouse_g502.png",
+      "type": "project-photo"
+    },
+    {
+      "id": 4,
+      "name": "Bàn phím cơ Keychron",
+      "file": "keychron_k2.png",
+      "type": "project-photo"
+    },
+    {
+      "id": 5,
+      "name": "Màn hình LG 27 inch",
+      "file": "minh-hoa-monitor.svg",
+      "type": "illustration"
+    },
+    {
+      "id": 15,
+      "name": "Màn hình Samsung Odyssey G5",
+      "file": "samsung_g5.png",
+      "type": "project-photo"
+    },
+    {
+      "id": 16,
+      "name": "Màn hình Dell Ultrasharp U2422",
+      "file": "dell_u2422.png",
+      "type": "project-photo"
+    },
+    {
+      "id": 17,
+      "name": "Màn hình Asus ProArt",
+      "file": "asus_proart.png",
+      "type": "project-photo"
+    },
+    {
+      "id": 18,
+      "name": "Chuột Logitech MX Master 3S",
+      "file": "logitech_mx3.png",
+      "type": "project-photo"
+    },
+    {
+      "id": 19,
+      "name": "Bàn phím Logitech K380",
+      "file": "logi_k380.png",
+      "type": "project-photo"
+    },
+    {
+      "id": 20,
+      "name": "Tai nghe Sony WH-1000XM5",
+      "file": "sony_xm5.png",
+      "type": "project-photo"
+    },
+    {
+      "id": 22,
+      "name": "Bàn phím cơ Keychron K8 Pro",
+      "file": "keychron_k8.png",
+      "type": "project-photo"
+    },
+    {
+      "id": 23,
+      "name": "Lót chuột Razer Gigantus",
+      "file": "razer_pad.png",
+      "type": "project-photo"
+    },
+    {
+      "id": 24,
+      "name": "RAM Kingston Fury 16GB",
+      "file": "kingston_ram16.png",
+      "type": "project-photo"
+    },
+    {
+      "id": 25,
+      "name": "SSD Samsung 980 Pro 1TB",
+      "file": "ssd_980pro.png",
+      "type": "project-photo"
+    },
+    {
+      "id": 26,
+      "name": "SSD Kingston NV2 500GB",
+      "file": "ssd_nv2.png",
+      "type": "project-photo"
+    },
+    {
+      "id": 27,
+      "name": "CPU Intel Core i9-13900K",
+      "file": "intel_i9.png",
+      "type": "project-photo"
+    },
+    {
+      "id": 28,
+      "name": "CPU Intel Core i5-12400F",
+      "file": "intel_i5.png",
+      "type": "project-photo"
+    },
+    {
+      "id": 29,
+      "name": "Mainboard Asus ROG Z790",
+      "file": "main_z790.png",
+      "type": "project-photo"
+    },
+    {
+      "id": 30,
+      "name": "Router Wifi 6 TP-Link Archer",
+      "file": "tplink_ax73.png",
+      "type": "project-photo"
+    },
+    {
+      "id": 31,
+      "name": "Switch TP-Link 8 Port",
+      "file": "tplink_switch.png",
+      "type": "project-photo"
+    },
+    {
+      "id": 32,
+      "name": "Bộ phát Wifi Mesh Asus",
+      "file": "asus_mesh.png",
+      "type": "project-photo"
+    },
+    {
+      "id": 33,
+      "name": "Dây cáp mạng CAT6 100m",
+      "file": "cable_cat6.png",
+      "type": "project-photo"
+    },
+    {
+      "id": 1002,
+      "name": "Intel Core i3-14100F",
+      "file": "intel_i3.png",
+      "type": "project-photo"
+    },
+    {
+      "id": 1003,
+      "name": "Intel Core i5-14400F",
+      "file": "intel_i5_14400F.png",
+      "type": "project-photo"
+    },
+    {
+      "id": 1004,
+      "name": "Intel Core i5-14600KF",
+      "file": "intel_i5_14600KF.png",
+      "type": "project-photo"
+    },
+    {
+      "id": 1005,
+      "name": "Intel Core i7-14700F",
+      "file": "intel_i7.png",
+      "type": "project-photo"
+    },
+    {
+      "id": 1006,
+      "name": "Intel Core Ultra 5 245K",
+      "file": "intel_core.png",
+      "type": "project-photo"
+    },
+    {
+      "id": 1007,
+      "name": "ASUS PRIME B760M-A WIFI D4",
+      "file": "asus_prime.png",
+      "type": "project-photo"
+    },
+    {
+      "id": 1008,
+      "name": "ASUS TUF GAMING B760M-PLUS WIFI",
+      "file": "asus_tuf.png",
+      "type": "project-photo"
+    },
+    {
+      "id": 1009,
+      "name": "ASUS ROG STRIX B650-A GAMING WIFI",
+      "file": "asus_rog_b650.png",
+      "type": "project-photo"
+    },
+    {
+      "id": 1010,
+      "name": "Kingston FURY Beast DDR4 16GB 3200MHz",
+      "file": "kingston_ddr4.png",
+      "type": "project-photo"
+    },
+    {
+      "id": 1011,
+      "name": "Kingston FURY Beast DDR5 16GB 5600MHz",
+      "file": "kingston_ddr5.png",
+      "type": "project-photo"
+    },
+    {
+      "id": 1012,
+      "name": "Kingston FURY Beast DDR5 32GB 6000MHz",
+      "file": "kingston_ddr5_32gb.png",
+      "type": "project-photo"
+    },
+    {
+      "id": 1013,
+      "name": "Samsung 990 PRO SSD 1TB NVMe",
+      "file": "samsung_990pro_1tb.png",
+      "type": "project-photo"
+    },
+    {
+      "id": 1014,
+      "name": "Samsung 990 PRO SSD 2TB NVMe",
+      "file": "samsung_990pro_2tb.png",
+      "type": "project-photo"
+    },
+    {
+      "id": 1015,
+      "name": "Kingston NV3 SSD 1TB NVMe",
+      "file": "kingston_nv3_1tb.png",
+      "type": "project-photo"
+    },
+    {
+      "id": 1016,
+      "name": "ASUS Dual GeForce RTX 4060 8GB",
+      "file": "asus_rtx4060.png",
+      "type": "project-photo"
+    },
+    {
+      "id": 1017,
+      "name": "ASUS Dual GeForce RTX 4070 SUPER 12GB",
+      "file": "asus_rtx4070super.png",
+      "type": "project-photo"
+    },
+    {
+      "id": 1018,
+      "name": "ASUS ROG STRIX 750G 750W",
+      "file": "asus_rog_750g.png",
+      "type": "project-photo"
+    },
+    {
+      "id": 1019,
+      "name": "ASUS TUF GAMING GT301 Case",
+      "file": "asus_tuf_gt301.png",
+      "type": "project-photo"
+    }
+  ],
+  "demoProducts": [
+    {
+      "id": 1,
+      "name": "CPU Intel Core i5",
+      "file": "intel_i5.png",
+      "type": "project-photo"
+    },
+    {
+      "id": 2,
+      "name": "CPU AMD Ryzen 5",
+      "file": "minh-hoa-cpu.svg",
+      "type": "illustration"
+    },
+    {
+      "id": 3,
+      "name": "RAM DDR4 16GB",
+      "file": "kingston_ram16.png",
+      "type": "project-photo"
+    },
+    {
+      "id": 4,
+      "name": "RAM DDR5 32GB",
+      "file": "minh-hoa-ram.svg",
+      "type": "illustration"
+    },
+    {
+      "id": 5,
+      "name": "SSD NVMe 1TB",
+      "file": "samsung_990pro_1tb.png",
+      "type": "project-photo"
+    },
+    {
+      "id": 6,
+      "name": "SSD SATA 512GB",
+      "file": "minh-hoa-ssd.svg",
+      "type": "illustration"
+    },
+    {
+      "id": 7,
+      "name": "Mainboard B760",
+      "file": "asus_prime.png",
+      "type": "project-photo"
+    },
+    {
+      "id": 8,
+      "name": "Card đồ họa RTX 4060",
+      "file": "minh-hoa-vga.svg",
+      "type": "illustration"
+    },
+    {
+      "id": 9,
+      "name": "Nguồn máy tính 650W",
+      "file": "minh-hoa-psu.svg",
+      "type": "illustration"
+    },
+    {
+      "id": 10,
+      "name": "Vỏ case Mid Tower",
+      "file": "minh-hoa-case.svg",
+      "type": "illustration"
+    }
+  ],
+  "assetCount": 46
+}

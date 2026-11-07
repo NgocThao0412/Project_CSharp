@@ -3,6 +3,8 @@
     var pageTitle = ViewData["Title"] as string ?? "Cửa hàng linh kiện máy tính";
     var haoTicket = await Context.AuthenticateAsync(Catalog.Web.Features.Hao.HaoAuth.Scheme);
     var haoSignedIn = haoTicket.Succeeded;
+    var customerHome = Catalog.Web.Features.Hao.HaoFrontendLinks.Home(Context.Request);
+    var customerProducts = Catalog.Web.Features.Hao.HaoFrontendLinks.Products(Context.Request);
 }
 <!doctype html>
 <html lang="vi">
@@ -15,27 +17,32 @@
     <link rel="stylesheet" href="@Url.Content("~/css/hao-web.css")" />
 </head>
 <body class="hao-page d-flex flex-column min-vh-100">
-<header class="hao-navbar sticky-top shadow-sm">
-    <nav class="navbar navbar-expand-lg navbar-dark py-3" aria-label="Điều hướng mua hàng">
+<header class="hao-navbar sticky-top">
+    <nav class="navbar navbar-expand-lg navbar-light py-3" aria-label="Điều hướng mua hàng">
         <div class="container">
-            <a class="navbar-brand fw-bold text-wrap hao-brand" href="/">CỬA HÀNG LINH KIỆN MÁY TÍNH</a>
+            <a class="navbar-brand fw-bold text-wrap hao-brand" href="@customerHome"><span class="hao-brand-mark" aria-hidden="true"></span><span class="hao-brand-lines"><small>CỬA HÀNG</small><strong>LINH KIỆN MÁY TÍNH</strong></span></a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#haoNavigation" aria-controls="haoNavigation" aria-expanded="false" aria-label="Mở menu">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="haoNavigation">
                 <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
-                    <li class="nav-item"><a class="nav-link" href="/">Trang chủ</a></li>
+                    <li class="nav-item"><a class="nav-link" href="@customerHome">Trang chủ</a></li>
+                    <li class="nav-item"><a class="nav-link" href="@customerProducts">Sản phẩm</a></li>
                     <li class="nav-item"><a class="nav-link" href="/gio-hang">Giỏ hàng</a></li>
                     <li class="nav-item"><a class="nav-link" href="/don-hang/tra-cuu">Tra cứu đơn</a></li>
                     <li class="nav-item"><a class="nav-link" href="/don-hang/cua-toi">Đơn của tôi</a></li>
                     @if (haoSignedIn)
                     {
                         <li class="nav-item"><span class="navbar-text hao-account-name">@haoTicket.Principal?.Identity?.Name</span></li>
-                        <li class="nav-item"><form method="post" action="/tai-khoan/dang-xuat">@Html.AntiForgeryToken()<button type="submit" class="btn btn-outline-light btn-sm ms-lg-1">Đăng xuất</button></form></li>
+                        <li class="nav-item"><form method="post" action="/tai-khoan/dang-xuat">@Html.AntiForgeryToken()<button type="submit" class="btn btn-outline-primary btn-sm ms-lg-1">Đăng xuất</button></form></li>
+                    }
+                    else if (pageTitle == "Đăng nhập")
+                    {
+                        <li class="nav-item"><a class="btn btn-outline-primary btn-sm ms-lg-1" href="/tai-khoan/dang-ky">Đăng ký</a></li>
                     }
                     else
                     {
-                        <li class="nav-item"><a class="btn btn-outline-light btn-sm ms-lg-1" href="/tai-khoan/dang-nhap">Đăng nhập</a></li>
+                        <li class="nav-item"><a class="btn btn-outline-primary btn-sm ms-lg-1" href="/tai-khoan/dang-nhap">Đăng nhập</a></li>
                     }
                 </ul>
             </div>

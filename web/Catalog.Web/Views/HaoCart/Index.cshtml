@@ -9,7 +9,7 @@
         <h1 class="h2 fw-bold mb-1">Giỏ hàng của bạn</h1>
         <p class="text-secondary mb-0">Kiểm tra linh kiện và số lượng trước khi đặt hàng.</p>
     </div>
-    <a class="btn btn-outline-primary" href="/">Tiếp tục mua sắm</a>
+    <a class="btn btn-outline-primary" href="@Catalog.Web.Features.Hao.HaoFrontendLinks.Products(Context.Request)">Tiếp tục mua sắm</a>
 </div>
 @if (Model.IsEmpty)
 {
@@ -18,7 +18,7 @@
             <div class="hao-empty-symbol" aria-hidden="true">🛒</div>
             <h2 class="h4 fw-bold">Giỏ hàng đang trống</h2>
             <p class="text-secondary">Chọn linh kiện từ trang sản phẩm để bắt đầu mua sắm.</p>
-            <a class="btn btn-primary px-4" href="/">Xem sản phẩm</a>
+            <a class="btn btn-primary px-4" href="@Catalog.Web.Features.Hao.HaoFrontendLinks.Products(Context.Request)">Xem sản phẩm</a>
         </div>
     </section>
 }
@@ -33,6 +33,7 @@ else
                 {
                     <tr>
                         <td>
+                            <img class="hao-cart-thumb" loading="lazy" src="@Catalog.Web.Features.Hao.HaoProductImages.ForDemoProduct(item.ProductId)" alt="Ảnh minh họa @item.Name" />
                             <strong>@item.Name</strong>
                             <div class="small text-secondary">
                                 Mã SP: @item.ProductId
