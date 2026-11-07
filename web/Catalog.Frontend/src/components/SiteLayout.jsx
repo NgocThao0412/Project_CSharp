@@ -1,71 +1,63 @@
 import { useEffect, useState } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import ShopIcon from './ShopIcon.jsx';
 
-// HTML structure and inline styling reproduce the original _Layout.cshtml.
-const navStyle = { display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' };
-const formStyle = {
-  display: 'inline-flex', alignItems: 'center', width: '210px', height: '34px',
-  border: '1px solid #cfd9eb', borderRadius: '8px', overflow: 'hidden',
-  background: '#fff', margin: 0,
-};
-const inputStyle = {
-  width: '100%', minWidth: 0, padding: '6px 9px', border: 0,
-  outline: 'none', background: 'transparent', font: 'inherit',
-  fontSize: '13px', color: '#1f2937',
-};
-const buttonStyle = {
-  height: '100%', width: '36px', flexShrink: 0, display: 'flex',
-  alignItems: 'center', justifyContent: 'center', border: 0,
-  background: '#1765e7', color: 'white', cursor: 'pointer',
-};
+const backendBase = import.meta.env.DEV ? 'http://localhost:5080' : '';
 
-function SearchIcon() {
-  return <svg width="17" height="17" viewBox="0 0 24 24" fill="none"
-    stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-    <circle cx="11" cy="11" r="7" />
-    <path d="m20 20-4-4" />
+function ShopLogo() {
+  return <svg className="shop-logo-icon" viewBox="0 0 56 56" fill="none" aria-hidden="true">
+    <path d="M28 3 53 28 28 53 3 28Z" stroke="currentColor" strokeWidth="5" />
+    <path d="M28 13 43 28 28 43 13 28Z" stroke="currentColor" strokeWidth="4" />
+    <path d="M28 22 34 28 28 34 22 28Z" fill="currentColor" />
   </svg>;
 }
 
 export default function SiteLayout() {
   const navigate = useNavigate();
   const location = useLocation();
-  const currentQuery = new URLSearchParams(location.search).get('q') ?? '';
-  const [keyword, setKeyword] = useState(currentQuery);
+  const query = new URLSearchParams(location.search).get('q') ?? '';
+  const [keyword, setKeyword] = useState(query);
+  const isCatalog = location.pathname.startsWith('/san-pham') || location.pathname.startsWith('/tim-kiem');
 
-  useEffect(() => setKeyword(currentQuery), [currentQuery]);
-
+  useEffect(() => setKeyword(query), [query]);
   useEffect(() => {
-    const page = location.pathname.startsWith('/san-pham/')
-      ? 'Chi tiết sản phẩm'
-      : location.pathname.startsWith('/san-pham') || location.pathname.startsWith('/tim-kiem')
-        ? 'Danh sách sản phẩm'
-        : 'Trang chủ';
-    document.title = `${page} - Cửa hàng linh kiện máy tính`;
-  }, [location.pathname]);
+    const title = location.pathname.startsWith('/san-pham/') ? 'Chi tiết sản phẩm' : isCatalog ? 'Sản phẩm' : 'Trang chủ';
+    document.title = `${title} - Cửa hàng linh kiện máy tính`;
+  }, [location.pathname, isCatalog]);
 
-  const onSearch = (event) => {
-    event.preventDefault();
-    const q = keyword.trim().slice(0, 100);
-    navigate(`/tim-kiem${q ? `?q=${encodeURIComponent(q)}` : ''}`);
-  };
+  function search(e) {
+    e.preventDefault();
+    const value = keyword.trim().slice(0, 100);
+    navigate(`/tim-kiem${value ? `?q=${encodeURIComponent(value)}` : ''}`);
+  }
 
   return <>
-    <header className="site-header">
-      <div className="wrap header-inner">
-        <Link className="brand" to="/">
-          <span className="brand-icon">◈</span>
-          <span>CỬA HÀNG<br /><strong>LINH KIỆN MÁY TÍNH</strong></span>
+    <header className="site-header shop-site-header">
+      <div className="shop-header-inner">
+        <Link to="/" className="shop-brand" aria-label="Cửa hàng linh kiện máy tính - Trang chủ">
+          <ShopLogo />
+          <span className="shop-brand-label">CỬA HÀNG<strong>LINH KIỆN MÁY TÍNH</strong></span>
         </Link>
-        <nav aria-label="Điều hướng chính" style={navStyle}>
-          <Link to="/">Trang chủ</Link>
-          <form onSubmit={onSearch} role="search" style={formStyle}>
-            <input type="search" name="q" value={keyword} onChange={e => setKeyword(e.target.value)}
-              maxLength={100} placeholder="Tìm sản phẩm..." aria-label="Tìm sản phẩm" style={inputStyle} />
-            <button type="submit" aria-label="Tìm kiếm" style={buttonStyle}><SearchIcon /></button>
-          </form>
-          <Link to="/san-pham">Sản phẩm</Link>
+        <nav className="shop-main-nav" aria-label="Điều hướng chính">
+          <Link to="/" className={!isCatalog ? 'shop-nav-active' : ''}><ShopIcon name="home" /> Trang chủ</Link>
+          <Link to="/san-pham" className={isCatalog ? 'shop-nav-active' : ''}><ShopIcon name="box" /> Sản phẩm</Link>
+          <span className="shop-nav-placeholder" title="Mục Tin tức đang được phát triển"><ShopIcon name="newspaper" /> Tin tức</span>
+          <span className="shop-nav-placeholder" title="Mục Liên hệ đang được phát triển"><ShopIcon name="phone" /> Liên hệ</span>
         </nav>
+        <div className="shop-header-actions">
+          <form className="shop-header-search" onSubmit={search} role="search">
+            <input type="search" name="q" value={keyword} onChange={e => setKeyword(e.target.value)} maxLength={100}
+              placeholder="Tìm sản phẩm, thương hiệu..." aria-label="Tìm sản phẩm" />
+            <button type="submit" aria-label="Tìm kiếm"><ShopIcon name="search" size={22} /></button>
+          </form>
+          <span className="shop-header-separator" />
+          <a href={`${backendBase}/gio-hang`} className="shop-action-icon" title="Mở giỏ hàng (Web C#)" aria-label="Giỏ hàng">
+            <ShopIcon name="cart" size={26} />
+          </a>
+          <a href={`${backendBase}/tai-khoan/dang-nhap`} className="shop-action-icon" title="Đăng nhập (Web C#)" aria-label="Tài khoản">
+            <ShopIcon name="user" size={26} />
+          </a>
+        </div>
       </div>
     </header>
     <main><Outlet /></main>
