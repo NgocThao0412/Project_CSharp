@@ -4,29 +4,29 @@ using System.Linq;
 using System.Text.Json;
 using Microsoft.AspNetCore.Http;
 
-namespace Catalog.Web.Features.Hao;
+namespace Catalog.Web.Features.BanHang;
 
 // Store ONLY product ID + quantity. Product price/name are read again on every request.
-public sealed class HaoCart
+public sealed class GioHang
 {
     private const string SessionKey = "HaoCartV1";
     private readonly IHttpContextAccessor _context;
 
-    public HaoCart(IHttpContextAccessor context) => _context = context;
+    public GioHang(IHttpContextAccessor context) => _context = context;
 
     private ISession Session => _context.HttpContext?.Session
         ?? throw new InvalidOperationException("Chua kich hoat app.UseSession() trong Program.cs.");
 
-    public List<HaoCartEntry> Read()
+    public List<MucGioHang> Read()
     {
         var json = Session.GetString(SessionKey);
         if (string.IsNullOrEmpty(json)) return new();
         try
         {
-            return (JsonSerializer.Deserialize<List<HaoCartEntry>>(json) ?? new())
+            return (JsonSerializer.Deserialize<List<MucGioHang>>(json) ?? new())
                 .Where(x => x.ProductId > 0 && x.Quantity > 0 && x.Quantity <= 99)
                 .GroupBy(x => x.ProductId)
-                .Select(g => new HaoCartEntry(g.Key, Math.Min(99, g.Sum(x => x.Quantity))))
+                .Select(g => new MucGioHang(g.Key, Math.Min(99, g.Sum(x => x.Quantity))))
                 .Take(30)
                 .ToList();
         }
@@ -42,8 +42,8 @@ public sealed class HaoCart
         {
             if (at >= 0) cart.RemoveAt(at);
         }
-        else if (at >= 0) cart[at] = new HaoCartEntry(productId, quantity);
-        else if (cart.Count < 30) cart.Add(new HaoCartEntry(productId, quantity));
+        else if (at >= 0) cart[at] = new MucGioHang(productId, quantity);
+        else if (cart.Count < 30) cart.Add(new MucGioHang(productId, quantity));
         else return false;
         Session.SetString(SessionKey, JsonSerializer.Serialize(cart));
         return true;

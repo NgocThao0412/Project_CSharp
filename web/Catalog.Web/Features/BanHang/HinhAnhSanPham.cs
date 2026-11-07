@@ -1,6 +1,6 @@
-namespace Catalog.Web.Features.Hao;
+namespace Catalog.Web.Features.BanHang;
 
-public static class HaoProductImages
+public static class HinhAnhSanPham
 {
     public static string ForDemoProduct(int id) => id switch
     {

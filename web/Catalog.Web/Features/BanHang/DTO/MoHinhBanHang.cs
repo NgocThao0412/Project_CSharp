@@ -3,23 +3,23 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 
-namespace Catalog.Web.Features.Hao;
+namespace Catalog.Web.Features.BanHang;
 
 // HAO-only types. No dependency on Ny's CatalogModels.cs or Thao's Desktop code.
-public sealed record HaoProduct(int ProductId, string Name, decimal PriceVnd, int ActualStock, bool IsOnSale = true);
-public sealed record HaoCartEntry(int ProductId, int Quantity);
-public sealed record HaoCartLine(int ProductId, string Name, decimal PriceVnd, int Quantity, int ActualStock, bool IsAvailable = true)
+public sealed record SanPhamBanHang(int ProductId, string Name, decimal PriceVnd, int ActualStock, bool IsOnSale = true);
+public sealed record MucGioHang(int ProductId, int Quantity);
+public sealed record DongGioHang(int ProductId, string Name, decimal PriceVnd, int Quantity, int ActualStock, bool IsAvailable = true)
 {
     public decimal SubtotalVnd => PriceVnd * Quantity;
 }
-public sealed class HaoCartPageVm
+public sealed class GioHangViewModel
 {
-    public List<HaoCartLine> Lines { get; init; } = new();
+    public List<DongGioHang> Lines { get; init; } = new();
     public decimal TotalVnd => Lines.Sum(x => x.SubtotalVnd);
     public bool IsEmpty => Lines.Count == 0;
     public bool HasUnavailable => Lines.Any(x => !x.IsAvailable);
 }
-public sealed class HaoCheckoutInput
+public sealed class ThongTinDatHang
 {
     [Required(ErrorMessage = "Vui lòng nhập họ tên.")]
     [StringLength(100, MinimumLength = 2, ErrorMessage = "Họ tên phải từ 2 đến 100 ký tự.")]
@@ -37,12 +37,12 @@ public sealed class HaoCheckoutInput
     [StringLength(150)]
     public string? Email { get; set; }
 }
-public sealed class HaoCheckoutPageVm
+public sealed class DatHangViewModel
 {
-    public HaoCheckoutInput Input { get; init; } = new();
-    public HaoCartPageVm Cart { get; init; } = new();
+    public ThongTinDatHang Input { get; init; } = new();
+    public GioHangViewModel Cart { get; init; } = new();
 }
-public sealed class HaoOrderLine
+public sealed class ChiTietDonHang
 {
     public int ProductId { get; init; }
     public string Name { get; init; } = string.Empty;
@@ -50,7 +50,7 @@ public sealed class HaoOrderLine
     public decimal UnitPriceVnd { get; init; }
     public decimal SubtotalVnd => UnitPriceVnd * Quantity;
 }
-public static class HaoStatuses
+public static class TrangThaiDonHang
 {
     public const string Holding = "DANG_GIU";
     public const string Cancelled = "DA_HUY";
@@ -65,19 +65,19 @@ public static class HaoStatuses
         _ => "Không xác định"
     };
 }
-public sealed class HaoOrderView
+public sealed class DonHangViewModel
 {
     public string Code { get; init; } = string.Empty;
     public string CustomerName { get; init; } = string.Empty;
     public string Address { get; init; } = string.Empty;
     public DateTimeOffset CreatedAtUtc { get; init; }
     public DateTimeOffset ExpiresAtUtc { get; init; }
-    public string Status { get; init; } = HaoStatuses.Holding;
-    public List<HaoOrderLine> Lines { get; init; } = new();
+    public string Status { get; init; } = TrangThaiDonHang.Holding;
+    public List<ChiTietDonHang> Lines { get; init; } = new();
     public decimal TotalVnd => Lines.Sum(x => x.SubtotalVnd);
-    public bool CanCancel => Status == HaoStatuses.Holding && ExpiresAtUtc > DateTimeOffset.UtcNow;
+    public bool CanCancel => Status == TrangThaiDonHang.Holding && ExpiresAtUtc > DateTimeOffset.UtcNow;
 }
-public sealed class HaoLookupInput
+public sealed class ThongTinTraCuuDonHang
 {
     [Required(ErrorMessage = "Vui lòng nhập mã đơn hàng.")]
     [StringLength(40)]
@@ -86,18 +86,18 @@ public sealed class HaoLookupInput
     [StringLength(64)]
     public string VerificationCode { get; set; } = string.Empty;
 }
-public sealed class HaoLookupPageVm
+public sealed class TraCuuDonHangViewModel
 {
-    public HaoLookupInput Input { get; init; } = new();
-    public HaoOrderView? Order { get; init; }
+    public ThongTinTraCuuDonHang Input { get; init; } = new();
+    public DonHangViewModel? Order { get; init; }
 }
-public sealed record HaoPlaceResult(bool Success, string? OrderCode, string? VerificationCode, string? ErrorCode, string? Message)
+public sealed record KetQuaDatHang(bool Success, string? OrderCode, string? VerificationCode, string? ErrorCode, string? Message)
 {
-    public static HaoPlaceResult Rejected(string code, string message) => new(false, null, null, code, message);
+    public static KetQuaDatHang Rejected(string code, string message) => new(false, null, null, code, message);
 }
-public sealed record HaoCancelResult(bool Success, string? ErrorCode, string Message);
+public sealed record KetQuaHuyDonHang(bool Success, string? ErrorCode, string Message);
 
-public sealed class HaoRegisterInput
+public sealed class ThongTinDangKy
 {
     [Required(ErrorMessage = "Vui lòng nhập họ tên.")]
     [StringLength(100, MinimumLength = 2)]
@@ -113,7 +113,7 @@ public sealed class HaoRegisterInput
     [Compare(nameof(Password), ErrorMessage = "Mật khẩu xác nhận không trùng khớp.")]
     public string ConfirmPassword { get; set; } = string.Empty;
 }
-public sealed class HaoLoginInput
+public sealed class ThongTinDangNhap
 {
     [Required(ErrorMessage = "Vui lòng nhập email.")]
     [EmailAddress]

@@ -1,39 +1,39 @@
-@model Catalog.Web.Features.Hao.HaoCartPageVm
+@model Catalog.Web.Features.BanHang.GioHangViewModel
 @{
-    Layout = "~/Views/Shared/_HaoLayout.cshtml";
+    Layout = "~/Views/Shared/_GiaoDienKhachHang.cshtml";
     ViewData["Title"] = "Giỏ hàng";
 }
 <div class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4">
     <div>
-        <div class="hao-eyebrow mb-2">GIỎ HÀNG</div>
+        <div class="kh-eyebrow mb-2">GIỎ HÀNG</div>
         <h1 class="h2 fw-bold mb-1">Giỏ hàng của bạn</h1>
         <p class="text-secondary mb-0">Kiểm tra linh kiện và số lượng trước khi đặt hàng.</p>
     </div>
-    <a class="btn btn-outline-primary" href="@Catalog.Web.Features.Hao.HaoFrontendLinks.Products(Context.Request)">Tiếp tục mua sắm</a>
+    <a class="btn btn-outline-primary" href="@Catalog.Web.Features.BanHang.LienKetGiaoDien.Products(Context.Request)">Tiếp tục mua sắm</a>
 </div>
 @if (Model.IsEmpty)
 {
-    <section class="card hao-card text-center py-5" aria-label="Giỏ hàng trống">
+    <section class="card kh-card text-center py-5" aria-label="Giỏ hàng trống">
         <div class="card-body py-4">
-            <div class="hao-empty-symbol" aria-hidden="true">🛒</div>
+            <div class="kh-empty-symbol" aria-hidden="true">🛒</div>
             <h2 class="h4 fw-bold">Giỏ hàng đang trống</h2>
             <p class="text-secondary">Chọn linh kiện từ trang sản phẩm để bắt đầu mua sắm.</p>
-            <a class="btn btn-primary px-4" href="@Catalog.Web.Features.Hao.HaoFrontendLinks.Products(Context.Request)">Xem sản phẩm</a>
+            <a class="btn btn-primary px-4" href="@Catalog.Web.Features.BanHang.LienKetGiaoDien.Products(Context.Request)">Xem sản phẩm</a>
         </div>
     </section>
 }
 else
 {
-    <div class="card hao-card overflow-hidden">
+    <div class="card kh-card overflow-hidden">
         <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0 hao-table">
+            <table class="table table-hover align-middle mb-0 kh-table">
                 <thead class="table-light"><tr><th scope="col">Linh kiện</th><th scope="col">Đơn giá</th><th scope="col">Số lượng</th><th scope="col">Thành tiền</th><th scope="col" class="text-end">Xóa</th></tr></thead>
                 <tbody>
                 @foreach (var item in Model.Lines)
                 {
                     <tr>
                         <td>
-                            <img class="hao-cart-thumb" loading="lazy" src="@Catalog.Web.Features.Hao.HaoProductImages.ForDemoProduct(item.ProductId)" alt="Ảnh minh họa @item.Name" />
+                            <img class="kh-cart-thumb" loading="lazy" src="@Catalog.Web.Features.BanHang.HinhAnhSanPham.ForDemoProduct(item.ProductId)" alt="Ảnh minh họa @item.Name" />
                             <strong>@item.Name</strong>
                             <div class="small text-secondary">
                                 Mã SP: @item.ProductId
@@ -52,7 +52,7 @@ else
                             <form class="d-flex gap-2 align-items-center" method="post" action="/gio-hang/cap-nhat">
                                 @Html.AntiForgeryToken()
                                 <input type="hidden" name="productId" value="@item.ProductId" />
-                                <input class="form-control hao-qty" type="number" name="quantity" min="0" max="99" required value="@item.Quantity" aria-label="Số lượng của @item.Name" />
+                                <input class="form-control kh-qty" type="number" name="quantity" min="0" max="99" required value="@item.Quantity" aria-label="Số lượng của @item.Name" />
                                 <button class="btn btn-sm btn-outline-primary" type="submit">Lưu</button>
                             </form>
                         </td>
@@ -68,9 +68,9 @@ else
     </div>
     <div class="row justify-content-end mt-4">
         <div class="col-12 col-lg-5">
-            <div class="card hao-card"><div class="card-body p-4">
+            <div class="card kh-card"><div class="card-body p-4">
                 <div class="d-flex justify-content-between align-items-center gap-2 mb-3">
-                    <span class="fw-semibold">Tạm tính</span><strong class="hao-price fs-4 text-nowrap">@Model.TotalVnd.ToString("N0") đ</strong>
+                    <span class="fw-semibold">Tạm tính</span><strong class="kh-price fs-4 text-nowrap">@Model.TotalVnd.ToString("N0") đ</strong>
                 </div>
                 <p class="small text-secondary">Giá và tồn khả dụng được kiểm tra lại khi xác nhận đơn.</p>
                 @if (Model.HasUnavailable)

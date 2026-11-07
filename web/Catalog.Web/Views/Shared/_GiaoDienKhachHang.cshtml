@@ -1,10 +1,10 @@
 @using Microsoft.AspNetCore.Authentication
 @{
     var pageTitle = ViewData["Title"] as string ?? "Cửa hàng linh kiện máy tính";
-    var haoTicket = await Context.AuthenticateAsync(Catalog.Web.Features.Hao.HaoAuth.Scheme);
-    var haoSignedIn = haoTicket.Succeeded;
-    var customerHome = Catalog.Web.Features.Hao.HaoFrontendLinks.Home(Context.Request);
-    var customerProducts = Catalog.Web.Features.Hao.HaoFrontendLinks.Products(Context.Request);
+    var phienDangNhapKhachHang = await Context.AuthenticateAsync(Catalog.Web.Features.BanHang.XacThucKhachHang.Scheme);
+    var khachHangDaDangNhap = phienDangNhapKhachHang.Succeeded;
+    var customerHome = Catalog.Web.Features.BanHang.LienKetGiaoDien.Home(Context.Request);
+    var customerProducts = Catalog.Web.Features.BanHang.LienKetGiaoDien.Products(Context.Request);
 }
 <!doctype html>
 <html lang="vi">
@@ -14,37 +14,37 @@
     <meta name="color-scheme" content="light" />
     <title>@pageTitle - Cửa hàng linh kiện máy tính</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous" />
-    <link rel="stylesheet" href="~/css/hao-web.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/giao-dien-khach-hang.css" asp-append-version="true" />
 </head>
-<body class="hao-page d-flex flex-column min-vh-100">
-<header class="hao-navbar sticky-top">
+<body class="kh-page d-flex flex-column min-vh-100">
+<header class="kh-navbar sticky-top">
     <nav class="navbar navbar-expand-lg navbar-dark py-3" aria-label="Điều hướng mua hàng">
         <div class="container">
-            <a class="navbar-brand fw-bold hao-brand" href="@customerHome">
-                <svg class="hao-brand-logo" viewBox="0 0 88 88" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+            <a class="navbar-brand fw-bold kh-brand" href="@customerHome">
+                <svg class="kh-brand-logo" viewBox="0 0 88 88" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
                     <path d="M44 4 L84 44 L44 84 L4 44 Z" fill="none" stroke="currentColor" stroke-width="6" />
                     <path d="M44 19 L69 44 L44 69 L19 44 Z" fill="none" stroke="currentColor" stroke-width="5" />
                     <path d="M44 32 L56 44 L44 56 L32 44 Z" fill="currentColor" />
                 </svg>
-                <span class="hao-brand-divider" aria-hidden="true"></span>
-                <span class="hao-brand-lines">
+                <span class="kh-brand-divider" aria-hidden="true"></span>
+                <span class="kh-brand-lines">
                     <small>CỬA HÀNG</small>
                     <strong>LINH KIỆN MÁY TÍNH</strong>
                 </span>
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#haoNavigation" aria-controls="haoNavigation" aria-expanded="false" aria-label="Mở menu">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#banHangNavigation" aria-controls="banHangNavigation" aria-expanded="false" aria-label="Mở menu">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            <div class="collapse navbar-collapse" id="haoNavigation">
+            <div class="collapse navbar-collapse" id="banHangNavigation">
                 <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
                     <li class="nav-item"><a class="nav-link" href="@customerHome">Trang chủ</a></li>
                     <li class="nav-item"><a class="nav-link" href="@customerProducts">Sản phẩm</a></li>
                     <li class="nav-item"><a class="nav-link" href="/gio-hang">Giỏ hàng</a></li>
                     <li class="nav-item"><a class="nav-link" href="/don-hang/tra-cuu">Tra cứu đơn</a></li>
                     <li class="nav-item"><a class="nav-link" href="/don-hang/cua-toi">Đơn của tôi</a></li>
-                    @if (haoSignedIn)
+                    @if (khachHangDaDangNhap)
                     {
-                        <li class="nav-item"><span class="navbar-text hao-account-name">@haoTicket.Principal?.Identity?.Name</span></li>
+                        <li class="nav-item"><span class="navbar-text kh-account-name">@phienDangNhapKhachHang.Principal?.Identity?.Name</span></li>
                         <li class="nav-item"><form method="post" action="/tai-khoan/dang-xuat">@Html.AntiForgeryToken()<button type="submit" class="btn btn-outline-primary btn-sm ms-lg-1">Đăng xuất</button></form></li>
                     }
                     else if (pageTitle == "Đăng nhập")
@@ -60,12 +60,12 @@
         </div>
     </nav>
 </header>
-<main class="container py-4 py-lg-5 flex-grow-1" id="hao-main">
-    @if (TempData["HaoMessage"] is string message)
+<main class="container py-4 py-lg-5 flex-grow-1" id="kh-main">
+    @if (TempData["ThongBaoThanhCong"] is string message)
     {
         <div class="alert alert-success d-flex align-items-center" role="status">@message</div>
     }
-    @if (TempData["HaoError"] is string error)
+    @if (TempData["ThongBaoLoi"] is string error)
     {
         <div class="alert alert-danger" role="alert">@error</div>
     }

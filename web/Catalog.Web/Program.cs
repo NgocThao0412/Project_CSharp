@@ -1,6 +1,6 @@
 
 using Catalog.Web.Services;
-using Catalog.Web.Features.Hao;
+using Catalog.Web.Features.BanHang;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,7 +18,7 @@ else
 
 if (builder.Environment.IsDevelopment())
 {
-    builder.Services.AddHaoWebDemo(builder.Environment);
+    builder.Services.AddBanHangDemo(builder.Environment);
 }
 
 builder.Services.AddAuthorization();

@@ -1,11 +1,11 @@
-@model System.Collections.Generic.IReadOnlyList<Catalog.Web.Features.Hao.HaoProduct>
+@model System.Collections.Generic.IReadOnlyList<Catalog.Web.Features.BanHang.SanPhamBanHang>
 @{
-    Layout = "~/Views/Shared/_HaoLayout.cshtml";
+    Layout = "~/Views/Shared/_GiaoDienKhachHang.cshtml";
     ViewData["Title"] = "Thử nghiệm phần Hào";
 }
 <div class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4">
     <div>
-        <div class="hao-eyebrow mb-2">CHỈ DÀNH CHO DEV / DEMO</div>
+        <div class="kh-eyebrow mb-2">CHỈ DÀNH CHO DEV / DEMO</div>
         <h1 class="h2 fw-bold mb-1">Linh kiện mẫu để thử giỏ hàng</h1>
         <p class="text-secondary mb-0">Không thay thế trang sản phẩm thật do Ny phụ trách.</p>
     </div>
@@ -15,17 +15,17 @@
 @foreach (var item in Model)
 {
     <div class="col">
-        <article class="card hao-card h-100 overflow-hidden">
-            <img class="hao-product-photo" loading="lazy" src="@Catalog.Web.Features.Hao.HaoProductImages.ForDemoProduct(item.ProductId)" alt="Ảnh minh họa @item.Name" />
+        <article class="card kh-card h-100 overflow-hidden">
+            <img class="kh-product-photo" loading="lazy" src="@Catalog.Web.Features.BanHang.HinhAnhSanPham.ForDemoProduct(item.ProductId)" alt="Ảnh minh họa @item.Name" />
             <div class="card-body d-flex flex-column p-3">
                 <h2 class="h6 fw-bold mb-2">@item.Name</h2>
-                <div class="hao-price fw-bold fs-5 mb-1">@item.PriceVnd.ToString("N0") đ</div>
+                <div class="kh-price fw-bold fs-5 mb-1">@item.PriceVnd.ToString("N0") đ</div>
                 <p class="small text-secondary mb-3">Tồn thực tế mẫu: @item.ActualStock</p>
                 <form class="mt-auto" method="post" action="/gio-hang/them">
                     @Html.AntiForgeryToken()
                     <input type="hidden" name="productId" value="@item.ProductId" />
                     <input type="hidden" name="quantity" value="1" />
-                    <input type="hidden" name="returnUrl" value="/hao-demo" />
+                    <input type="hidden" name="returnUrl" value="/demo" />
                     <button class="btn btn-primary w-100" type="submit">Thêm vào giỏ</button>
                 </form>
             </div>

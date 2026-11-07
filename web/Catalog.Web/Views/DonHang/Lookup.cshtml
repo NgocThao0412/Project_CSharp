@@ -1,23 +1,23 @@
-@model Catalog.Web.Features.Hao.HaoLookupPageVm
+@model Catalog.Web.Features.BanHang.TraCuuDonHangViewModel
 @{
-    Layout = "~/Views/Shared/_HaoLayout.cshtml";
+    Layout = "~/Views/Shared/_GiaoDienKhachHang.cshtml";
     ViewData["Title"] = "Tra cứu và hủy đơn";
 }
 <div class="mb-4">
-    <div class="hao-eyebrow mb-2">TRA CỨU ĐƠN HÀNG</div>
+    <div class="kh-eyebrow mb-2">TRA CỨU ĐƠN HÀNG</div>
     <h1 class="h2 fw-bold mb-1">Tra cứu và hủy đơn</h1>
     <p class="text-secondary">Nhập mã đơn và mã xác thực được cấp khi đặt hàng thành công.</p>
 </div>
-<form class="card hao-card" action="/don-hang/tra-cuu" method="post">
+<form class="card kh-card" action="/don-hang/tra-cuu" method="post">
     <div class="card-body p-4">
         @Html.AntiForgeryToken()
         @Html.ValidationSummary(true, "", new { @class = "text-danger small mb-3" })
         <div class="row g-3 align-items-end">
-            <div class="col-md-5"><label class="form-label fw-semibold" for="hao-code">Mã đơn hàng</label>
-                <input class="form-control" id="hao-code" name="OrderCode" required maxlength="40" autocomplete="off" value="@Model.Input.OrderCode" />
+            <div class="col-md-5"><label class="form-label fw-semibold" for="kh-code">Mã đơn hàng</label>
+                <input class="form-control" id="kh-code" name="OrderCode" required maxlength="40" autocomplete="off" value="@Model.Input.OrderCode" />
                 @Html.ValidationMessage("OrderCode", null, new { @class = "text-danger small" })</div>
-            <div class="col-md-5"><label class="form-label fw-semibold" for="hao-secret">Mã xác thực</label>
-                <input class="form-control" id="hao-secret" name="VerificationCode" required maxlength="64" autocomplete="off" value="@Model.Input.VerificationCode" />
+            <div class="col-md-5"><label class="form-label fw-semibold" for="kh-secret">Mã xác thực</label>
+                <input class="form-control" id="kh-secret" name="VerificationCode" required maxlength="64" autocomplete="off" value="@Model.Input.VerificationCode" />
                 @Html.ValidationMessage("VerificationCode", null, new { @class = "text-danger small" })</div>
             <div class="col-md-2"><button class="btn btn-primary w-100" type="submit">Tra cứu</button></div>
         </div>
@@ -28,23 +28,23 @@
     var order = Model.Order;
     var statusClass = order.Status switch
     {
-        Catalog.Web.Features.Hao.HaoStatuses.Holding => "text-bg-primary",
-        Catalog.Web.Features.Hao.HaoStatuses.Issued => "text-bg-success",
-        Catalog.Web.Features.Hao.HaoStatuses.Cancelled => "text-bg-secondary",
+        Catalog.Web.Features.BanHang.TrangThaiDonHang.Holding => "text-bg-primary",
+        Catalog.Web.Features.BanHang.TrangThaiDonHang.Issued => "text-bg-success",
+        Catalog.Web.Features.BanHang.TrangThaiDonHang.Cancelled => "text-bg-secondary",
         _ => "text-bg-warning"
     };
-    <section class="card hao-card mt-4" aria-label="Thông tin đơn hàng">
+    <section class="card kh-card mt-4" aria-label="Thông tin đơn hàng">
         <div class="card-body p-4">
             <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 border-bottom pb-3 mb-3">
                 <div><h2 class="h4 fw-bold mb-1">Đơn @order.Code</h2><div class="small text-secondary">Tạo lúc @order.CreatedAtUtc.ToOffset(TimeSpan.FromHours(7)).ToString("dd/MM/yyyy HH:mm") (GMT+7)</div></div>
-                <span class="badge @statusClass fs-6">@Catalog.Web.Features.Hao.HaoStatuses.Display(order.Status)</span>
+                <span class="badge @statusClass fs-6">@Catalog.Web.Features.BanHang.TrangThaiDonHang.Display(order.Status)</span>
             </div>
-            <dl class="row hao-details">
+            <dl class="row kh-details">
                 <dt class="col-sm-3">Khách hàng</dt><dd class="col-sm-9">@order.CustomerName</dd>
                 <dt class="col-sm-3">Địa chỉ</dt><dd class="col-sm-9">@order.Address</dd>
                 <dt class="col-sm-3">Hết hạn giữ</dt><dd class="col-sm-9">@order.ExpiresAtUtc.ToOffset(TimeSpan.FromHours(7)).ToString("dd/MM/yyyy HH:mm") (GMT+7)</dd>
             </dl>
-            <div class="table-responsive"><table class="table table-hover align-middle hao-table">
+            <div class="table-responsive"><table class="table table-hover align-middle kh-table">
                 <thead class="table-light"><tr><th>Linh kiện</th><th>SL</th><th>Đơn giá</th><th>Thành tiền</th></tr></thead>
                 <tbody>
                 @foreach (var item in order.Lines)
@@ -58,7 +58,7 @@
                 }
                 </tbody>
             </table></div>
-            <div class="d-flex justify-content-between gap-2 p-3 hao-total"><span>Tổng cộng</span><strong>@order.TotalVnd.ToString("N0") đ</strong></div>
+            <div class="d-flex justify-content-between gap-2 p-3 kh-total"><span>Tổng cộng</span><strong>@order.TotalVnd.ToString("N0") đ</strong></div>
             @if (order.CanCancel)
             {
                 <form method="post" action="/don-hang/huy" class="mt-4" onsubmit="return confirm('Xác nhận hủy đơn đang giữ?');">

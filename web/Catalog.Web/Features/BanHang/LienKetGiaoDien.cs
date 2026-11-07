@@ -1,10 +1,10 @@
 using System;
 using Microsoft.AspNetCore.Http;
 
-namespace Catalog.Web.Features.Hao;
+namespace Catalog.Web.Features.BanHang;
 
 /// <summary>Links from the legacy MVC pages to the React storefront in development.</summary>
-public static class HaoFrontendLinks
+public static class LienKetGiaoDien
 {
     public static string Origin(HttpRequest request)
     {

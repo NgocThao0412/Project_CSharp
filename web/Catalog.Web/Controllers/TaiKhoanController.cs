@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using Catalog.Web.Features.Hao;
+using Catalog.Web.Features.BanHang;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -9,17 +9,17 @@ using Microsoft.AspNetCore.Mvc;
 namespace Catalog.Web.Controllers;
 
 [Route("tai-khoan")]
-public sealed class HaoAccountController : Controller
+public sealed class TaiKhoanController : Controller
 {
-    private readonly IHaoAccounts _accounts;
-    public HaoAccountController(IHaoAccounts accounts) => _accounts = accounts;
+    private readonly ITaiKhoanKhachHang _accounts;
+    public TaiKhoanController(ITaiKhoanKhachHang accounts) => _accounts = accounts;
 
     [HttpGet("dang-ky")]
-    public IActionResult Register() => View(new HaoRegisterInput());
+    public IActionResult Register() => View(new ThongTinDangKy());
 
     [HttpPost("dang-ky")]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Register(HaoRegisterInput input)
+    public async Task<IActionResult> Register(ThongTinDangKy input)
     {
         if (!ModelState.IsValid) return View(input);
         if (!_accounts.TryRegister(input, out var account) || account is null)
@@ -28,16 +28,16 @@ public sealed class HaoAccountController : Controller
             return View(input);
         }
         await SignInCustomer(account);
-        TempData["HaoMessage"] = "Đăng ký tài khoản thành công (chế độ DEMO).";
-        return RedirectToAction("MyOrders", "HaoOrders");
+        TempData["ThongBaoThanhCong"] = "Đăng ký tài khoản thành công (chế độ DEMO).";
+        return RedirectToAction("MyOrders", "DonHang");
     }
 
     [HttpGet("dang-nhap")]
-    public IActionResult Login() => View(new HaoLoginInput());
+    public IActionResult Login() => View(new ThongTinDangNhap());
 
     [HttpPost("dang-nhap")]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Login(HaoLoginInput input, string? returnUrl = null)
+    public async Task<IActionResult> Login(ThongTinDangNhap input, string? returnUrl = null)
     {
         if (!ModelState.IsValid) return View(input);
         var account = _accounts.Login(input.Email, input.Password);
@@ -49,19 +49,19 @@ public sealed class HaoAccountController : Controller
         await SignInCustomer(account);
         if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
             return LocalRedirect(returnUrl);
-        return RedirectToAction("MyOrders", "HaoOrders");
+        return RedirectToAction("MyOrders", "DonHang");
     }
 
     [HttpPost("dang-xuat")]
     [ValidateAntiForgeryToken]
-    [Authorize(AuthenticationSchemes = HaoAuth.Scheme)]
+    [Authorize(AuthenticationSchemes = XacThucKhachHang.Scheme)]
     public async Task<IActionResult> Logout()
     {
-        await HttpContext.SignOutAsync(HaoAuth.Scheme);
+        await HttpContext.SignOutAsync(XacThucKhachHang.Scheme);
         return Redirect("/");
     }
 
-    private Task SignInCustomer(HaoAccountRecord account)
+    private Task SignInCustomer(TaiKhoanKhachHang account)
     {
         var claims = new List<Claim>
         {
@@ -69,8 +69,8 @@ public sealed class HaoAccountController : Controller
             new(ClaimTypes.Name, account.Name),
             new(ClaimTypes.Email, account.Email)
         };
-        var identity = new ClaimsIdentity(claims, HaoAuth.Scheme);
-        return HttpContext.SignInAsync(HaoAuth.Scheme, new ClaimsPrincipal(identity),
+        var identity = new ClaimsIdentity(claims, XacThucKhachHang.Scheme);
+        return HttpContext.SignInAsync(XacThucKhachHang.Scheme, new ClaimsPrincipal(identity),
             new AuthenticationProperties { IsPersistent = false });
     }
 }

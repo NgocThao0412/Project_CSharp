@@ -1,15 +1,15 @@
-using Catalog.Web.Features.Hao;
+using Catalog.Web.Features.BanHang;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Catalog.Web.Controllers;
 
 [Route("gio-hang")]
-public sealed class HaoCartController : Controller
+public sealed class GioHangController : Controller
 {
-    private readonly HaoCart _cart;
-    private readonly HaoCartBuilder _builder;
-    private readonly IHaoCatalog _catalog;
-    public HaoCartController(HaoCart cart, HaoCartBuilder builder, IHaoCatalog catalog)
+    private readonly GioHang _cart;
+    private readonly TaoGioHang _builder;
+    private readonly IDanhMucSanPham _catalog;
+    public GioHangController(GioHang cart, TaoGioHang builder, IDanhMucSanPham catalog)
     {
         _cart = cart;
         _builder = builder;
@@ -25,11 +25,11 @@ public sealed class HaoCartController : Controller
     {
         var product = _catalog.Get(productId);
         if (product is null || !product.IsOnSale || quantity is < 1 or > 99)
-            TempData["HaoError"] = "Sản phẩm hoặc số lượng không hợp lệ.";
+            TempData["ThongBaoLoi"] = "Sản phẩm hoặc số lượng không hợp lệ.";
         else if (!_cart.Add(productId, quantity))
-            TempData["HaoError"] = "Không thể thêm sản phẩm (tối đa 30 dòng, 99 sản phẩm/dòng).";
+            TempData["ThongBaoLoi"] = "Không thể thêm sản phẩm (tối đa 30 dòng, 99 sản phẩm/dòng).";
         else
-            TempData["HaoMessage"] = "Đã thêm sản phẩm vào giỏ hàng.";
+            TempData["ThongBaoThanhCong"] = "Đã thêm sản phẩm vào giỏ hàng.";
         return !string.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl)
             ? LocalRedirect(returnUrl) : RedirectToAction(nameof(Index));
     }
@@ -39,11 +39,11 @@ public sealed class HaoCartController : Controller
     public IActionResult Update(int productId, int quantity)
     {
         if (quantity > 0 && _catalog.Get(productId) is null)
-            TempData["HaoError"] = "Không tìm thấy sản phẩm.";
+            TempData["ThongBaoLoi"] = "Không tìm thấy sản phẩm.";
         else if (!_cart.SetQuantity(productId, quantity))
-            TempData["HaoError"] = "Số lượng phải trong khoảng 0–99.";
+            TempData["ThongBaoLoi"] = "Số lượng phải trong khoảng 0–99.";
         else
-            TempData["HaoMessage"] = "Đã cập nhật giỏ hàng.";
+            TempData["ThongBaoThanhCong"] = "Đã cập nhật giỏ hàng.";
         return RedirectToAction(nameof(Index));
     }
 

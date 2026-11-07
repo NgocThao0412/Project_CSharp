@@ -4,9 +4,9 @@ using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 
-namespace Catalog.Web.Features.Hao;
+namespace Catalog.Web.Features.BanHang;
 
-public sealed class HaoAccountRecord
+public sealed class TaiKhoanKhachHang
 {
     public string Id { get; init; } = Guid.NewGuid().ToString("N");
     public string Name { get; init; } = string.Empty;
@@ -15,22 +15,22 @@ public sealed class HaoAccountRecord
     internal int FailedAttempts { get; set; }
     internal DateTimeOffset? LockedUntilUtc { get; set; }
 }
-public interface IHaoAccounts
+public interface ITaiKhoanKhachHang
 {
-    bool TryRegister(HaoRegisterInput input, out HaoAccountRecord? account);
-    HaoAccountRecord? Login(string email, string password);
+    bool TryRegister(ThongTinDangKy input, out TaiKhoanKhachHang? account);
+    TaiKhoanKhachHang? Login(string email, string password);
 }
 
 // DEMO ONLY: accounts disappear when the process restarts. Do not enable for production.
-public sealed class HaoDemoAccounts : IHaoAccounts
+public sealed class TaiKhoanDemo : ITaiKhoanKhachHang
 {
     private readonly object _lock = new();
-    private readonly Dictionary<string, HaoAccountRecord> _users = new(StringComparer.OrdinalIgnoreCase);
-    private readonly PasswordHasher<HaoAccountRecord> _hasher = new();
-    private readonly ILogger<HaoDemoAccounts> _logger;
-    public HaoDemoAccounts(ILogger<HaoDemoAccounts> logger) => _logger = logger;
+    private readonly Dictionary<string, TaiKhoanKhachHang> _users = new(StringComparer.OrdinalIgnoreCase);
+    private readonly PasswordHasher<TaiKhoanKhachHang> _hasher = new();
+    private readonly ILogger<TaiKhoanDemo> _logger;
+    public TaiKhoanDemo(ILogger<TaiKhoanDemo> logger) => _logger = logger;
 
-    public bool TryRegister(HaoRegisterInput input, out HaoAccountRecord? account)
+    public bool TryRegister(ThongTinDangKy input, out TaiKhoanKhachHang? account)
     {
         account = null;
         var email = (input.Email ?? "").Trim().ToLowerInvariant();
@@ -41,7 +41,7 @@ public sealed class HaoDemoAccounts : IHaoAccounts
         lock (_lock)
         {
             if (_users.ContainsKey(email)) return false;
-            var user = new HaoAccountRecord { Email = email, Name = input.Name.Trim() };
+            var user = new TaiKhoanKhachHang { Email = email, Name = input.Name.Trim() };
             user.PasswordHash = _hasher.HashPassword(user, input.Password);
             _users.Add(email, user);
             account = user;
@@ -49,7 +49,7 @@ public sealed class HaoDemoAccounts : IHaoAccounts
         }
     }
 
-    public HaoAccountRecord? Login(string email, string password)
+    public TaiKhoanKhachHang? Login(string email, string password)
     {
         lock (_lock)
         {
