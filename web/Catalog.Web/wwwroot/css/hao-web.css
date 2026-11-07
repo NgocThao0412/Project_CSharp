@@ -57,3 +57,49 @@
 .hao-page .hao-cart-thumb{width:74px;height:74px;object-fit:contain;background:#eef5fa;border-radius:9px;border:1px solid #e1eaf3;padding:5px;vertical-align:middle;margin-right:10px}
 .hao-page .hao-product-photo{display:block;width:100%;height:175px;object-fit:contain;background:#eef5fa;padding:14px}
 .hao-page .hao-footer{background:white;border-top:1px solid #e1eaf3}
+
+/* HAO UI V3: colors and white customer logo, scoped to Hào's MVC pages. */
+.hao-page .hao-navbar { background: #075cef !important; border-bottom: 0 !important; }
+.hao-page .hao-navbar .navbar-brand,
+.hao-page .hao-navbar .navbar-brand:hover,
+.hao-page .hao-navbar .navbar-brand:focus {
+    display: inline-flex; align-items: center; gap: 13px;
+    color: #ffffff !important; text-decoration: none; white-space: nowrap;
+}
+.hao-page .hao-brand-logo { width: 48px; height: 48px; flex: 0 0 48px; display: block; color: #ffffff; }
+.hao-page .hao-brand-divider { width: 1px; height: 44px; flex: 0 0 1px; background: rgba(255,255,255,.55); }
+.hao-page .hao-navbar .hao-brand-lines { display: flex; flex-direction: column; gap: 2px; line-height: 1.15; color: #ffffff; }
+.hao-page .hao-navbar .hao-brand-lines small { font-size: 12px; font-weight: 700; letter-spacing: .2px; }
+.hao-page .hao-navbar .hao-brand-lines strong { font-size: 16px; font-weight: 800; letter-spacing: .2px; }
+.hao-page .hao-navbar .nav-link,
+.hao-page .hao-navbar .navbar-text { color: #ffffff !important; }
+.hao-page .hao-navbar .nav-link:hover,
+.hao-page .hao-navbar .nav-link:focus-visible { color: #e0ecff !important; }
+.hao-page .hao-navbar .navbar-toggler { border-color: rgba(255,255,255,.65); }
+.hao-page .hao-navbar .navbar-toggler-icon { filter: none; }
+/* Header buttons: white outline / white label, inverted on hover. */
+.hao-page .hao-navbar .btn-outline-primary,
+.hao-page .hao-navbar .btn-outline-primary:visited {
+    background: transparent; border: 1px solid #ffffff;
+    color: #ffffff !important; border-radius: 8px;
+    padding: 6px 15px; font-weight: 700;
+    transition: background-color .15s ease, color .15s ease;
+}
+.hao-page .hao-navbar .btn-outline-primary:hover,
+.hao-page .hao-navbar .btn-outline-primary:focus-visible {
+    background: #ffffff !important; border-color: #ffffff !important;
+    color: #075cef !important;
+}
+/* The login submit button and other primary actions. */
+.hao-page .btn-primary { background: #075cef; border-color: #075cef; color: #ffffff; }
+.hao-page .btn-primary:hover,
+.hao-page .btn-primary:focus-visible { background: #0049ca; border-color: #0049ca; color: #ffffff; }
+.hao-page .hao-eyebrow { color: #075cef; }
+.hao-page .form-control:focus { border-color: #075cef; box-shadow: 0 0 0 .2rem rgba(7,92,239,.13); }
+@media (max-width: 575px) {
+    .hao-page .hao-navbar .navbar-brand { gap: 9px; }
+    .hao-page .hao-brand-logo { width: 35px; height: 35px; flex-basis: 35px; }
+    .hao-page .hao-brand-divider { height: 33px; }
+    .hao-page .hao-navbar .hao-brand-lines small { font-size: 10px; }
+    .hao-page .hao-navbar .hao-brand-lines strong { font-size: 12px; }
+}

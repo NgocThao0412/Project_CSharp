@@ -14,13 +14,24 @@
     <meta name="color-scheme" content="light" />
     <title>@pageTitle - Cửa hàng linh kiện máy tính</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous" />
-    <link rel="stylesheet" href="@Url.Content("~/css/hao-web.css")" />
+    <link rel="stylesheet" href="~/css/hao-web.css" asp-append-version="true" />
 </head>
 <body class="hao-page d-flex flex-column min-vh-100">
 <header class="hao-navbar sticky-top">
-    <nav class="navbar navbar-expand-lg navbar-light py-3" aria-label="Điều hướng mua hàng">
+    <nav class="navbar navbar-expand-lg navbar-dark py-3" aria-label="Điều hướng mua hàng">
         <div class="container">
-            <a class="navbar-brand fw-bold text-wrap hao-brand" href="@customerHome"><span class="hao-brand-mark" aria-hidden="true"></span><span class="hao-brand-lines"><small>CỬA HÀNG</small><strong>LINH KIỆN MÁY TÍNH</strong></span></a>
+            <a class="navbar-brand fw-bold hao-brand" href="@customerHome">
+                <svg class="hao-brand-logo" viewBox="0 0 88 88" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+                    <path d="M44 4 L84 44 L44 84 L4 44 Z" fill="none" stroke="currentColor" stroke-width="6" />
+                    <path d="M44 19 L69 44 L44 69 L19 44 Z" fill="none" stroke="currentColor" stroke-width="5" />
+                    <path d="M44 32 L56 44 L44 56 L32 44 Z" fill="currentColor" />
+                </svg>
+                <span class="hao-brand-divider" aria-hidden="true"></span>
+                <span class="hao-brand-lines">
+                    <small>CỬA HÀNG</small>
+                    <strong>LINH KIỆN MÁY TÍNH</strong>
+                </span>
+            </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#haoNavigation" aria-controls="haoNavigation" aria-expanded="false" aria-label="Mở menu">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -49,9 +60,6 @@
         </div>
     </nav>
 </header>
-<div class="hao-demo-notice text-center py-2 px-3" role="note">
-    MÔ-ĐUN KIỂM THỬ RIÊNG: đơn hàng/tài khoản hiện lưu trong bộ nhớ, <strong>chưa đồng bộ SQL Server và Desktop</strong>.
-</div>
 <main class="container py-4 py-lg-5 flex-grow-1" id="hao-main">
     @if (TempData["HaoMessage"] is string message)
     {
@@ -63,12 +71,6 @@
     }
     @RenderBody()
 </main>
-<footer class="hao-footer mt-auto py-4">
-    <div class="container d-flex flex-wrap align-items-center justify-content-between gap-2 small">
-        <span>© 2026 Cửa hàng linh kiện máy tính</span>
-        <span>Phần Hào · ASP.NET Core MVC · Bootstrap 5</span>
-    </div>
-</footer>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
 @await RenderSectionAsync("Scripts", required: false)
 </body>
