@@ -1,4 +1,16 @@
-﻿USE [master];
+﻿-- ============================================================================
+-- QUAN LY VA BAN LINH KIEN MAY TINH | SQL Server
+-- File duy nhat: database/quan_ly.sql
+-- Muc dich: Khoi tao CSDL MOI tren SQL Server, co du lieu DEMO, rang buoc va View.
+-- Khong chay nguyen file tren CSDL quanlykho dang co du lieu!
+-- Sao luu database truoc khi thao tac. Script khong DROP database/bang.
+-- Chay bang SSMS / sqlcmd (ho tro batch GO). Dung SQL Server co quyen CREATE DATABASE.
+-- Du lieu nhan vien/khach hang la gia lap, khong phai thong tin ca nhan that.
+-- TK demo giu ma bam goc de khong mat chuc nang dang nhap; BAT BUOC doi mat khau khi trien khai.
+-- CANH BAO: Goi script nay tren instance SQL Server MOI, KHONG chay lai tren quanlykho da ton tai.
+-- ============================================================================
+
+USE [master];
 GO
 IF DB_ID(N'quanlykho') IS NOT NULL
     THROW 51000, N'Database quanlykho da ton tai. Chi chay script tren instance SQL Server sach.', 1;
