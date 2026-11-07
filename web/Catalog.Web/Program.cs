@@ -1,52 +1,36 @@
-
-using Catalog.Web.Services;
-using Catalog.Web.Features.BanHang;
+using Catalog.Web.BUS;
+using Catalog.Web.config;
+using Catalog.Web.DAO;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllersWithViews();
-builder.Services.AddProblemDetails();
-
-if (builder.Configuration.GetValue<bool>("Catalog:UseDemoData"))
+builder.Services.AddControllers();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(options =>
 {
-    builder.Services.AddSingleton<IProductRepository, DemoProductRepository>();
-}
-else
-{
-    builder.Services.AddScoped<IProductRepository, SqlProductRepository>();
-}
+    options.IdleTimeout = TimeSpan.FromHours(2);
+    options.Cookie.Name = ".Catalog.GioHang";
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+    options.Cookie.SameSite = SameSiteMode.Lax;
+});
 
-if (builder.Environment.IsDevelopment())
-{
-    builder.Services.AddBanHangDemo(builder.Environment);
-}
-
-builder.Services.AddAuthorization();
+builder.Services.AddScoped<KetNoi>();
+builder.Services.AddScoped<ISanPhamDAO, SanPhamSqlDAO>();
+builder.Services.AddScoped<DonHangDAO>();
+builder.Services.AddScoped<GioHangBUS>();
 
 var app = builder.Build();
 
 if (!app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler();
     app.UseHsts();
-    app.UseHttpsRedirection();
 }
 
-app.UseDefaultFiles();
 app.UseStaticFiles();
 app.UseRouting();
-
-if (app.Environment.IsDevelopment())
-{
-    app.UseSession();
-    app.UseAuthentication();
-}
-
-app.UseAuthorization();
+app.UseSession();
 app.MapControllers();
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
-app.MapFallbackToFile("index.html");
 
 app.Run();

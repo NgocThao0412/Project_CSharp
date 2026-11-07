@@ -4,6 +4,7 @@ import { useApi } from '../API/GoiAPI.js';
 import ProductCard from './ThanhPhan/TheSanPham.jsx';
 import LoadState from './ThanhPhan/TrangThaiTaiDuLieu.jsx';
 import ShopIcon from './ThanhPhan/BieuTuongCuaHang.jsx';
+import { themGioHang } from '../API/GioHangAPI.js';
 
 
 // Adapt the existing paginated C# API to the four cards per page in the design,
@@ -107,6 +108,13 @@ export default function ProductsPage() {
     return `${location.pathname}?${search.toString()}`;
   }
 
+  async function themVaoGio(item) {
+    try {
+      await themGioHang(item.id);
+      setNotice(`Đã thêm ${item.name} vào giỏ hàng.`);
+    } catch (err) { setNotice(err.message); }
+  }
+
   function toggleFavorite(id) {
     setFavorites(old => {
       const next = new Set(old);
@@ -169,7 +177,7 @@ export default function ProductsPage() {
         : <div className="catalog-products-grid">
             {sortedItems.map(item => <ProductCard key={item.id} product={item} variant="catalog"
               isFavorite={favorites.has(item.id)} onToggleFavorite={toggleFavorite}
-              onAddToCart={() => setNotice('Giỏ hàng đang dùng dữ liệu riêng của phần đặt hàng. Chưa thể thêm sản phẩm này cho đến khi nhóm tích hợp chung danh mục.')} />)}
+              onAddToCart={() => themVaoGio(item)} />)}
           </div>)}
 
       {!loading && !error && data?.pageCount > 1 && <nav className="catalog-pagination" aria-label="Phân trang">

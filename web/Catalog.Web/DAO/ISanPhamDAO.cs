@@ -1,11 +1,11 @@
-using Catalog.Web.Models;
+using Catalog.Web.DTO;
 
-namespace Catalog.Web.Services;
+namespace Catalog.Web.DAO;
 
-public interface IProductRepository
+public interface ISanPhamDAO
 {
-    Task<IReadOnlyList<CatalogProduct>> FeaturedAsync(int count, CancellationToken ct);
-    Task<IReadOnlyList<string>> CategoriesAsync(CancellationToken ct);
-    Task<PagedCatalog> SearchAsync(CatalogQuery query, CancellationToken ct);
-    Task<CatalogProduct?> GetAsync(int id, CancellationToken ct);
+    Task<IReadOnlyList<SanPhamDTO>> LayNoiBatAsync(int soLuong, CancellationToken ct = default);
+    Task<IReadOnlyList<string>> LayDanhMucAsync(CancellationToken ct = default);
+    Task<DanhSachSanPhamDTO> TimAsync(TimKiemSanPhamDTO dieuKien, CancellationToken ct = default);
+    Task<SanPhamDTO?> LayTheoMaAsync(int ma, CancellationToken ct = default);
 }

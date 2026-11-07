@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import ShopIcon from './BieuTuongCuaHang.jsx';
 
-const backendBase = import.meta.env.DEV ? 'http://localhost:5080' : '';
 
 function ShopLogo() {
   return <svg className="shop-logo-icon" viewBox="0 0 56 56" fill="none" aria-hidden="true">
@@ -21,7 +20,10 @@ export default function SiteLayout() {
 
   useEffect(() => setKeyword(query), [query]);
   useEffect(() => {
-    const title = location.pathname.startsWith('/san-pham/') ? 'Chi tiết sản phẩm' : isCatalog ? 'Sản phẩm' : 'Trang chủ';
+    const title = location.pathname.startsWith('/san-pham/') ? 'Chi tiết sản phẩm'
+      : isCatalog ? 'Sản phẩm' : location.pathname === '/gio-hang' ? 'Giỏ hàng'
+      : location.pathname.startsWith('/tai-khoan/') ? 'Tài khoản'
+      : location.pathname.startsWith('/don-hang/') ? 'Tra cứu đơn hàng' : 'Trang chủ';
     document.title = `${title} - Cửa hàng linh kiện máy tính`;
   }, [location.pathname, isCatalog]);
 
@@ -51,12 +53,13 @@ export default function SiteLayout() {
             <button type="submit" aria-label="Tìm kiếm"><ShopIcon name="search" size={22} /></button>
           </form>
           <span className="shop-header-separator" />
-          <a href={`${backendBase}/gio-hang`} className="shop-action-icon" title="Mở giỏ hàng (Web C#)" aria-label="Giỏ hàng">
+          <Link to="/don-hang/tra-cuu" className="shop-order-link">Tra cứu đơn</Link>
+          <Link to="/gio-hang" className="shop-action-icon" title="Giỏ hàng" aria-label="Giỏ hàng">
             <ShopIcon name="cart" size={26} />
-          </a>
-          <a href={`${backendBase}/tai-khoan/dang-nhap`} className="shop-action-icon" title="Đăng nhập (Web C#)" aria-label="Tài khoản">
+          </Link>
+          <Link to="/tai-khoan/dang-nhap" className="shop-action-icon" title="Đăng nhập" aria-label="Tài khoản">
             <ShopIcon name="user" size={26} />
-          </a>
+          </Link>
         </div>
       </div>
     </header>
