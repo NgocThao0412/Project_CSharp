@@ -35,7 +35,6 @@ export default function GioHang() {
   return <div className="wrap section web-customer-page">
     <div className="breadcrumb"><Link to="/">Trang chủ</Link> / Giỏ hàng</div>
     <h1>Giỏ hàng của bạn</h1>
-    <p className="muted">Số lượng và đơn giá được kiểm tra lại từ SQL Server.</p>
     {loi && <div className="web-error" role="alert">{loi}</div>}
     {!gio && !loi && <p>Đang tải giỏ hàng...</p>}
     {gio && gio.items.length === 0 && <div className="web-empty">

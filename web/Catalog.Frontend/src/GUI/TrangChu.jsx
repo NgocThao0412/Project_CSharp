@@ -61,7 +61,9 @@ export default function HomePage() {
     <section className="page-container section home-products">
       <div className="section-heading">
         <div><span className="eyebrow blue">DANH MỤC ĐỀ XUẤT</span><h2>Sản phẩm nổi bật</h2></div>
-        <Link to="/san-pham">Xem tất cả →</Link>
+        <Link to="/san-pham" className="home-view-all">
+          Xem tất cả →
+        </Link>
       </div>
       <LoadState loading={loading} error={error} />
       {!loading && !error && <div className="product-grid">

@@ -14,12 +14,11 @@ export default function TaiKhoan() {
         {dangKy && <label>Số điện thoại<input type="tel" autoComplete="tel" placeholder="Nhập số điện thoại" /></label>}
         <label>Mật khẩu<input type="password" autoComplete={dangKy ? 'new-password' : 'current-password'} placeholder="Nhập mật khẩu" /></label>
         {dangKy && <label>Xác nhận mật khẩu<input type="password" autoComplete="new-password" placeholder="Nhập lại mật khẩu" /></label>}
-        <button className="web-primary" type="submit" disabled>{dangKy ? 'Đăng ký' : 'Đăng nhập'} (chưa khả dụng)</button>
+        <button className="web-primary" type="submit" disabled>{dangKy ? 'Đăng ký' : 'Đăng nhập'}</button>
       </form>
       <div className="web-account-switch">{dangKy ? 'Đã có tài khoản?' : 'Chưa có tài khoản?'}{' '}
         <Link to={dangKy ? '/tai-khoan/dang-nhap' : '/tai-khoan/dang-ky'}>{dangKy ? 'Đăng nhập' : 'Đăng ký'}</Link>
       </div>
-      <p className="web-info">Giao diện được giữ để kiểm thử. CSDL hiện chưa có cơ chế mật khẩu dành cho khách hàng nên không ghi nhận thông tin tài khoản.</p>
     </section>
   </div>;
 }
