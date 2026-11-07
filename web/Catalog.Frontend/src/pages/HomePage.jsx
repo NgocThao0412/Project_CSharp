@@ -41,7 +41,6 @@ export default function HomePage() {
       <div className="hero-live-copy">
         <h1>Nâng cấp hiệu năng<br />cho máy tính của bạn</h1>
         <p>Linh kiện chính hãng <span>·</span> Giá tốt <span>·</span> Bảo hành uy tín</p>
-        <Link className="hero-cta" to="/san-pham">Khám phá ngay <span aria-hidden="true">→</span></Link>
       </div>
       <img className="hero-mobile-image" src="/images/hero-parts.webp"
         alt="CPU AMD Ryzen, bộ nhớ RAM RGB và card đồ họa" />
