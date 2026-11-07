@@ -11,6 +11,10 @@ const demoEntries = imageIndex.demoProducts.map(item => ({...item, key: normaliz
 // Chỉ dùng ảnh theo tên và mã phù hợp; ID 3 của SQL khác ID 3 của dữ liệu demo.
 export function getProductImage(product, fallbackUrl) {
   const originalUrl = typeof product?.imageUrl === 'string' ? product.imageUrl.trim() : '';
+  if (/^[a-zA-Z0-9_.-]+\.(png|jpg|jpeg|webp|svg)$/i.test(originalUrl)
+      && originalUrl.toLowerCase() !== 'tmp.png') {
+    return `${PHOTO_ROOT}${originalUrl}`;
+  }
   if (originalUrl && (originalUrl.startsWith('/') && !originalUrl.startsWith('//') || /^https?:\/\//i.test(originalUrl))) {
     return originalUrl;
   }

@@ -9,10 +9,11 @@ export default defineConfig({
     strictPort: true,
     proxy: {
       '/api': { target: 'http://127.0.0.1:5080', changeOrigin: true },
+      '/images': { target: 'http://127.0.0.1:5080', changeOrigin: true },
     },
   },
   build: {
-    // dotnet run ở cổng 5080 có thể phục vụ React khi đã build frontend.
+    // React build output is served by ASP.NET Core.
     outDir: '../Catalog.Web/wwwroot',
     emptyOutDir: false,
   },
