@@ -1,88 +1,91 @@
 using System.Data;
+using Catalog.Web.config;
+using Catalog.Web.DTO;
 using Microsoft.Data.SqlClient;
-using Catalog.Web.Models;
 
-namespace Catalog.Web.Services;
+namespace Catalog.Web.DAO;
 
-// Đọc từ view hợp đồng, tránh giả định tên cột ở DB hiện tại của cả nhóm.
-// Cần đối chiếu SQL Server của nhóm và tạo dbo.vw_Catalog theo Database/VIEW_CONTRACT.md.
-public sealed class SqlProductRepository(IConfiguration config) : IProductRepository
+// Giữ truy vấn dbo.vw_Catalog của nhóm; chỉ thống nhất tên lớp và cấu hình kết nối.
+public sealed class SanPhamSqlDAO(KetNoi ketNoi) : ISanPhamDAO
 {
-    private async Task<SqlConnection> OpenAsync(CancellationToken ct)
+    private const string Cot = "ProductId, ProductName, CategoryName, BrandName, Price, AvailableQuantity, ImageUrl, Description";
+
+    private static SanPhamDTO Doc(SqlDataReader r) => new(
+        r.GetInt32(0), r.GetString(1), r.GetString(2), r.GetString(3),
+        r.GetDecimal(4), r.GetInt32(5),
+        r.IsDBNull(6) ? null : r.GetString(6),
+        r.IsDBNull(7) ? "" : r.GetString(7));
+
+    public async Task<SanPhamDTO?> LayTheoMaAsync(int ma, CancellationToken ct = default)
     {
-        string? connectionString = config.GetConnectionString("DefaultConnection");
-        if (string.IsNullOrWhiteSpace(connectionString))
-            throw new InvalidOperationException("Chưa cấu hình ConnectionStrings:DefaultConnection.");
-        var conn = new SqlConnection(connectionString);
-        try { await conn.OpenAsync(ct); return conn; }
-        catch { await conn.DisposeAsync(); throw; }
-    }
-
-    private const string Fields = "ProductId, ProductName, CategoryName, BrandName, Price, AvailableQuantity, ImageUrl, Description";
-
-    private static CatalogProduct Read(SqlDataReader reader) => new(
-        reader.GetInt32(0), reader.GetString(1), reader.GetString(2),
-        reader.GetString(3), reader.GetDecimal(4), reader.GetInt32(5),
-        reader.IsDBNull(6) ? null : reader.GetString(6), reader.GetString(7));
-
-    private static SqlParameter Parameter(string name, SqlDbType type, object value) =>
-        new(name, type) { Value = value };
-
-    public async Task<CatalogProduct?> GetAsync(int id, CancellationToken ct)
-    {
-        await using var conn = await OpenAsync(ct);
-        await using var cmd = new SqlCommand($"SELECT {Fields} FROM dbo.vw_Catalog WHERE ProductId = @id", conn);
-        cmd.Parameters.Add(Parameter("@id", SqlDbType.Int, id));
+        if (ma <= 0) return null;
+        await using var db = await ketNoi.MoAsync(ct);
+        await using var cmd = new SqlCommand($"SELECT {Cot} FROM dbo.vw_Catalog WHERE ProductId = @ma", db);
+        cmd.Parameters.Add("@ma", SqlDbType.Int).Value = ma;
         await using var r = await cmd.ExecuteReaderAsync(ct);
-        return await r.ReadAsync(ct) ? Read(r) : null;
+        return await r.ReadAsync(ct) ? Doc(r) : null;
     }
 
-    public async Task<IReadOnlyList<CatalogProduct>> FeaturedAsync(int count, CancellationToken ct)
+    public async Task<IReadOnlyList<SanPhamDTO>> LayNoiBatAsync(int soLuong, CancellationToken ct = default)
     {
-        await using var conn = await OpenAsync(ct);
-        await using var cmd = new SqlCommand($"SELECT TOP (@limit) {Fields} FROM dbo.vw_Catalog ORDER BY ProductId DESC", conn);
-        cmd.Parameters.Add(Parameter("@limit", SqlDbType.Int, Math.Clamp(count, 1, 20)));
+        await using var db = await ketNoi.MoAsync(ct);
+        await using var cmd = new SqlCommand($"SELECT TOP (@soLuong) {Cot} FROM dbo.vw_Catalog ORDER BY ProductId DESC", db);
+        cmd.Parameters.Add("@soLuong", SqlDbType.Int).Value = Math.Clamp(soLuong, 1, 20);
         await using var r = await cmd.ExecuteReaderAsync(ct);
-        var items = new List<CatalogProduct>();
-        while (await r.ReadAsync(ct)) items.Add(Read(r));
-        return items;
+        var result = new List<SanPhamDTO>();
+        while (await r.ReadAsync(ct)) result.Add(Doc(r));
+        return result;
     }
 
-    public async Task<IReadOnlyList<string>> CategoriesAsync(CancellationToken ct)
+    public async Task<IReadOnlyList<string>> LayDanhMucAsync(CancellationToken ct = default)
     {
-        await using var conn = await OpenAsync(ct);
+        await using var db = await ketNoi.MoAsync(ct);
         await using var cmd = new SqlCommand(
-            "SELECT DISTINCT CategoryName FROM dbo.vw_Catalog WHERE CategoryName <> '' ORDER BY CategoryName", conn);
+            "SELECT DISTINCT CategoryName FROM dbo.vw_Catalog WHERE CategoryName <> '' ORDER BY CategoryName", db);
         await using var r = await cmd.ExecuteReaderAsync(ct);
-        var items = new List<string>();
-        while (await r.ReadAsync(ct)) items.Add(r.GetString(0));
-        return items;
+        var result = new List<string>();
+        while (await r.ReadAsync(ct)) result.Add(r.GetString(0));
+        return result;
     }
 
     private static string EscapeLike(string s) => s.Replace("!", "!!").Replace("%", "!%").Replace("_", "!_").Replace("[", "![");
 
-    public async Task<PagedCatalog> SearchAsync(CatalogQuery query, CancellationToken ct)
+    public async Task<DanhSachSanPhamDTO> TimAsync(TimKiemSanPhamDTO dieuKien, CancellationToken ct = default)
     {
-        string keyword = query.SafeKeyword;
-        string category = query.SafeCategory;
-        string where = "WHERE (@keyword = '' OR ProductName LIKE @pattern ESCAPE '!' OR BrandName LIKE @pattern ESCAPE '!' OR CategoryName LIKE @pattern ESCAPE '!') AND (@category = '' OR CategoryName = @category)";
-        await using var conn = await OpenAsync(ct);
-        async Task<SqlCommand> PrepareAsync(string sql)
+        var tuKhoa = dieuKien.TuKhoaAnToan;
+        var danhMuc = dieuKien.DanhMucAnToan;
+        var sapXep = dieuKien.SapXepAnToan;
+        var thuTu = sapXep switch
         {
-            var cmd = new SqlCommand(sql, conn);
-            cmd.Parameters.Add(Parameter("@keyword", SqlDbType.NVarChar, keyword));
-            cmd.Parameters.Add(Parameter("@pattern", SqlDbType.NVarChar, "%" + EscapeLike(keyword) + "%"));
-            cmd.Parameters.Add(Parameter("@category", SqlDbType.NVarChar, category));
-            return await Task.FromResult(cmd);
+            "gia-tang" => "Price ASC, ProductId DESC",
+            "gia-giam" => "Price DESC, ProductId DESC",
+            "ten" => "ProductName ASC, ProductId DESC",
+            _ => "ProductId DESC"
+        };
+        const string dieuKienSql = "WHERE (@tuKhoa = '' OR ProductName LIKE @mau ESCAPE '!' " +
+            "OR BrandName LIKE @mau ESCAPE '!' OR CategoryName LIKE @mau ESCAPE '!') " +
+            "AND (@danhMuc = '' OR CategoryName = @danhMuc)";
+
+        await using var db = await ketNoi.MoAsync(ct);
+        SqlCommand TaoLenh(string sql)
+        {
+            var cmd = new SqlCommand(sql, db);
+            cmd.Parameters.Add("@tuKhoa", SqlDbType.NVarChar, 100).Value = tuKhoa;
+            cmd.Parameters.Add("@mau", SqlDbType.NVarChar, 220).Value = "%" + EscapeLike(tuKhoa) + "%";
+            cmd.Parameters.Add("@danhMuc", SqlDbType.NVarChar, 100).Value = danhMuc;
+            return cmd;
         }
-        await using var countCmd = await PrepareAsync($"SELECT COUNT(*) FROM dbo.vw_Catalog {where}");
-        int total = Convert.ToInt32(await countCmd.ExecuteScalarAsync(ct));
-        await using var cmd = await PrepareAsync($"SELECT {Fields} FROM dbo.vw_Catalog {where} ORDER BY ProductId DESC OFFSET @offset ROWS FETCH NEXT @limit ROWS ONLY");
-        cmd.Parameters.Add(Parameter("@offset", SqlDbType.Int, (query.SafePage - 1) * CatalogQuery.PageSize));
-        cmd.Parameters.Add(Parameter("@limit", SqlDbType.Int, CatalogQuery.PageSize));
-        await using var r = await cmd.ExecuteReaderAsync(ct);
-        var items = new List<CatalogProduct>();
-        while (await r.ReadAsync(ct)) items.Add(Read(r));
-        return new PagedCatalog(items, total, query.SafePage, CatalogQuery.PageSize, keyword, category);
+
+        await using var dem = TaoLenh($"SELECT COUNT(*) FROM dbo.vw_Catalog {dieuKienSql}");
+        var tong = Convert.ToInt32(await dem.ExecuteScalarAsync(ct));
+        var soTrang = Math.Max(1, (tong + TimKiemSanPhamDTO.SoSanPhamMoiTrang - 1) / TimKiemSanPhamDTO.SoSanPhamMoiTrang);
+        var trang = Math.Min(dieuKien.TrangAnToan, soTrang);
+        await using var lay = TaoLenh($"SELECT {Cot} FROM dbo.vw_Catalog {dieuKienSql} ORDER BY {thuTu} OFFSET @boQua ROWS FETCH NEXT @lay ROWS ONLY");
+        lay.Parameters.Add("@boQua", SqlDbType.Int).Value = (trang - 1) * TimKiemSanPhamDTO.SoSanPhamMoiTrang;
+        lay.Parameters.Add("@lay", SqlDbType.Int).Value = TimKiemSanPhamDTO.SoSanPhamMoiTrang;
+        await using var r = await lay.ExecuteReaderAsync(ct);
+        var result = new List<SanPhamDTO>();
+        while (await r.ReadAsync(ct)) result.Add(Doc(r));
+        return new DanhSachSanPhamDTO(result, tong, trang, TimKiemSanPhamDTO.SoSanPhamMoiTrang, tuKhoa, danhMuc, sapXep);
     }
 }

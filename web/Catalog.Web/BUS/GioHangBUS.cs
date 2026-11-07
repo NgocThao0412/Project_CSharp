@@ -1,60 +1,80 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text.Json;
-using Microsoft.AspNetCore.Http;
+using Catalog.Web.DAO;
+using Catalog.Web.DTO;
 
-namespace Catalog.Web.Features.BanHang;
+namespace Catalog.Web.BUS;
 
-// Store ONLY product ID + quantity. Product price/name are read again on every request.
-public sealed class GioHang
+public sealed class GioHangBUS(IHttpContextAccessor truyCap, ISanPhamDAO sanPham)
 {
-    private const string SessionKey = "HaoCartV1";
-    private readonly IHttpContextAccessor _context;
+    private const string Khoa = "GioHangWeb";
+    private ISession Phien => truyCap.HttpContext?.Session
+        ?? throw new InvalidOperationException("Chưa bật Session trong Program.cs.");
 
-    public GioHang(IHttpContextAccessor context) => _context = context;
-
-    private ISession Session => _context.HttpContext?.Session
-        ?? throw new InvalidOperationException("Chua kich hoat app.UseSession() trong Program.cs.");
-
-    public List<MucGioHang> Read()
+    private List<MucGioHangDTO> Doc()
     {
-        var json = Session.GetString(SessionKey);
-        if (string.IsNullOrEmpty(json)) return new();
         try
         {
-            return (JsonSerializer.Deserialize<List<MucGioHang>>(json) ?? new())
-                .Where(x => x.ProductId > 0 && x.Quantity > 0 && x.Quantity <= 99)
-                .GroupBy(x => x.ProductId)
-                .Select(g => new MucGioHang(g.Key, Math.Min(99, g.Sum(x => x.Quantity))))
-                .Take(30)
-                .ToList();
+            var json = Phien.GetString(Khoa);
+            if (string.IsNullOrWhiteSpace(json)) return new();
+            return (JsonSerializer.Deserialize<List<MucGioHangDTO>>(json) ?? new())
+                .Where(x => x.MaSanPham > 0 && x.SoLuong is > 0 and <= 99)
+                .GroupBy(x => x.MaSanPham)
+                .Select(g => new MucGioHangDTO(g.Key, Math.Min(99, g.Sum(x => x.SoLuong))))
+                .Take(30).ToList();
         }
-        catch (JsonException) { return new(); }
-    }
-
-    public bool SetQuantity(int productId, int quantity)
-    {
-        if (productId <= 0 || quantity is < 0 or > 99) return false;
-        var cart = Read();
-        var at = cart.FindIndex(x => x.ProductId == productId);
-        if (quantity == 0)
+        catch (JsonException)
         {
-            if (at >= 0) cart.RemoveAt(at);
+            return new();
         }
-        else if (at >= 0) cart[at] = new MucGioHang(productId, quantity);
-        else if (cart.Count < 30) cart.Add(new MucGioHang(productId, quantity));
-        else return false;
-        Session.SetString(SessionKey, JsonSerializer.Serialize(cart));
-        return true;
     }
 
-    public bool Add(int productId, int quantity)
+    private void Luu(List<MucGioHangDTO> gio) => Phien.SetString(Khoa, JsonSerializer.Serialize(gio));
+
+    public async Task<string?> ThemAsync(int ma, int soLuong, CancellationToken ct = default)
     {
-        if (quantity is < 1 or > 99) return false;
-        var current = Read().FirstOrDefault(x => x.ProductId == productId)?.Quantity ?? 0;
-        return SetQuantity(productId, current + quantity);
+        if (ma <= 0 || soLuong is < 1 or > 99) return "Số lượng không hợp lệ.";
+        var sp = await sanPham.LayTheoMaAsync(ma, ct);
+        if (sp is null) return "Sản phẩm không tồn tại.";
+        var gio = Doc();
+        var cu = gio.FirstOrDefault(x => x.MaSanPham == ma)?.SoLuong ?? 0;
+        if (cu + soLuong > sp.Ton || cu + soLuong > 99) return "Số lượng vượt quá tồn kho.";
+        if (cu == 0)
+        {
+            if (gio.Count >= 30) return "Giỏ hàng tối đa 30 sản phẩm khác nhau.";
+            gio.Add(new MucGioHangDTO(ma, soLuong));
+        }
+        else gio[gio.FindIndex(x => x.MaSanPham == ma)] = new MucGioHangDTO(ma, cu + soLuong);
+        Luu(gio);
+        return null;
     }
 
-    public void Clear() => Session.Remove(SessionKey);
+    public async Task<string?> CapNhatAsync(int ma, int soLuong, CancellationToken ct = default)
+    {
+        if (ma <= 0 || soLuong is < 0 or > 99) return "Số lượng không hợp lệ.";
+        var gio = Doc();
+        var viTri = gio.FindIndex(x => x.MaSanPham == ma);
+        if (soLuong == 0)
+        {
+            if (viTri >= 0) gio.RemoveAt(viTri);
+            Luu(gio);
+            return null;
+        }
+        if (viTri < 0) return "Không tìm thấy sản phẩm trong giỏ.";
+        var sp = await sanPham.LayTheoMaAsync(ma, ct);
+        if (sp is null || sp.Ton < soLuong) return "Không đủ tồn kho.";
+        gio[viTri] = new MucGioHangDTO(ma, soLuong);
+        Luu(gio);
+        return null;
+    }
+
+    public async Task<TrangGioHangDTO> LayTrangAsync(CancellationToken ct = default)
+    {
+        var result = new List<DongGioHangDTO>();
+        foreach (var item in Doc())
+        {
+            var sp = await sanPham.LayTheoMaAsync(item.MaSanPham, ct);
+            if (sp is not null) result.Add(new DongGioHangDTO(sp, item.SoLuong));
+        }
+        return new TrangGioHangDTO(result);
+    }
 }

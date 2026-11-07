@@ -1,40 +1,86 @@
-using Catalog.Web.Models;
-using Catalog.Web.Services;
+using Catalog.Web.DAO;
+using Catalog.Web.DTO;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
 
 namespace Catalog.Web.Controllers;
 
-// React chỉ gọi API này, backend giữ nguyên IProductRepository và truy vấn SQL Server.
 [ApiController]
 [Route("api/catalog")]
-public sealed class CatalogApiController(IProductRepository products) : ControllerBase
+public sealed class CatalogApiController(ISanPhamDAO sanPham, ILogger<CatalogApiController> log) : ControllerBase
 {
-    [HttpGet("featured")]
-    public async Task<ActionResult<IReadOnlyList<CatalogProduct>>> Featured(
-        [FromQuery] int count = 6, CancellationToken ct = default)
+    private static object DinhDang(SanPhamDTO sp) => new
     {
-        return Ok(await products.FeaturedAsync(Math.Clamp(count, 1, 20), ct));
+        id = sp.Ma,
+        name = sp.Ten,
+        category = sp.DanhMuc,
+        brand = sp.Hang,
+        price = sp.Gia,
+        availableQuantity = sp.Ton,
+        imageUrl = sp.HinhAnh,
+        description = sp.MoTa
+    };
+
+    [HttpGet("featured")]
+    public async Task<IActionResult> NoiBat([FromQuery] int count = 6, CancellationToken ct = default)
+    {
+        try
+        {
+            var ketQua = await sanPham.LayNoiBatAsync(Math.Clamp(count, 1, 20), ct);
+            return Ok(ketQua.Select(DinhDang));
+        }
+        catch (SqlException ex)
+        {
+            log.LogError(ex, "Không đọc được sản phẩm nổi bật từ SQL Server.");
+            return Problem("Chưa thể kết nối SQL Server.", statusCode: 503);
+        }
     }
 
     [HttpGet("categories")]
-    public async Task<ActionResult<IReadOnlyList<string>>> Categories(CancellationToken ct)
+    public async Task<IActionResult> DanhMuc(CancellationToken ct)
     {
-        return Ok(await products.CategoriesAsync(ct));
+        try { return Ok(await sanPham.LayDanhMucAsync(ct)); }
+        catch (SqlException ex)
+        {
+            log.LogError(ex, "Không đọc được danh mục sản phẩm.");
+            return Problem("Chưa thể kết nối SQL Server.", statusCode: 503);
+        }
     }
 
     [HttpGet("products")]
-    public async Task<ActionResult<PagedCatalog>> Search(
-        [FromQuery] string? q, [FromQuery] string? category,
+    public async Task<IActionResult> DanhSach([FromQuery] string? q, [FromQuery] string? category,
         [FromQuery] int page = 1, CancellationToken ct = default)
     {
-        return Ok(await products.SearchAsync(new CatalogQuery(q, category, page), ct));
+        try
+        {
+            var ketQua = await sanPham.TimAsync(new TimKiemSanPhamDTO(q, category, page), ct);
+            return Ok(new
+            {
+                items = ketQua.SanPham.Select(DinhDang),
+                total = ketQua.Tong,
+                page = ketQua.Trang,
+                pageSize = ketQua.SoLuongMoiTrang
+            });
+        }
+        catch (SqlException ex)
+        {
+            log.LogError(ex, "Không đọc được danh sách sản phẩm.");
+            return Problem("Chưa thể kết nối SQL Server.", statusCode: 503);
+        }
     }
 
     [HttpGet("products/{id:int}")]
-    public async Task<ActionResult<CatalogProduct>> Details(int id, CancellationToken ct)
+    public async Task<IActionResult> ChiTiet(int id, CancellationToken ct)
     {
-        if (id <= 0) return NotFound();
-        var item = await products.GetAsync(id, ct);
-        return item is null ? NotFound() : Ok(item);
+        try
+        {
+            var sp = await sanPham.LayTheoMaAsync(id, ct);
+            return sp is null ? NotFound(new { message = "Không tìm thấy sản phẩm." }) : Ok(DinhDang(sp));
+        }
+        catch (SqlException ex)
+        {
+            log.LogError(ex, "Không đọc được chi tiết sản phẩm {Ma}.", id);
+            return Problem("Chưa thể kết nối SQL Server.", statusCode: 503);
+        }
     }
 }
