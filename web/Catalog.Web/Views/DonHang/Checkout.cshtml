@@ -1,35 +1,35 @@
-@model Catalog.Web.Features.Hao.HaoCheckoutPageVm
+@model Catalog.Web.Features.BanHang.DatHangViewModel
 @{
-    Layout = "~/Views/Shared/_HaoLayout.cshtml";
+    Layout = "~/Views/Shared/_GiaoDienKhachHang.cshtml";
     ViewData["Title"] = "Đặt hàng";
 }
 <div class="mb-4">
-    <div class="hao-eyebrow mb-2">ĐẶT HÀNG</div>
+    <div class="kh-eyebrow mb-2">ĐẶT HÀNG</div>
     <h1 class="h2 fw-bold mb-1">Thông tin nhận hàng</h1>
     <p class="text-secondary">Khi đặt thành công, sản phẩm được giữ trong 30 phút (bản demo), chưa trừ tồn kho thực tế.</p>
 </div>
 <div class="row g-4 align-items-start">
     <div class="col-12 col-lg-7">
-        <div class="card hao-card"><div class="card-body p-4 p-lg-5">
+        <div class="card kh-card"><div class="card-body p-4 p-lg-5">
             <h2 class="h5 fw-bold mb-4">Thông tin người đặt</h2>
             <form method="post" action="/don-hang/dat-hang">
                 @Html.AntiForgeryToken()
                 @Html.ValidationSummary(true, "", new { @class = "text-danger small mb-3" })
                 <div class="mb-3">
-                    <label class="form-label fw-semibold" for="hao-name">Họ và tên <span class="text-danger">*</span></label>
-                    <input class="form-control" id="hao-name" name="Input.CustomerName" maxlength="100" required autocomplete="name" value="@Model.Input.CustomerName" />
+                    <label class="form-label fw-semibold" for="kh-name">Họ và tên <span class="text-danger">*</span></label>
+                    <input class="form-control" id="kh-name" name="Input.CustomerName" maxlength="100" required autocomplete="name" value="@Model.Input.CustomerName" />
                     @Html.ValidationMessage("Input.CustomerName", null, new { @class = "text-danger small" })
                 </div>
                 <div class="row g-3 mb-3">
-                    <div class="col-12 col-md-6"><label class="form-label fw-semibold" for="hao-phone">Số điện thoại <span class="text-danger">*</span></label>
-                        <input class="form-control" id="hao-phone" name="Input.Phone" type="tel" maxlength="10" pattern="0[0-9]{9}" required autocomplete="tel" value="@Model.Input.Phone" />
+                    <div class="col-12 col-md-6"><label class="form-label fw-semibold" for="kh-phone">Số điện thoại <span class="text-danger">*</span></label>
+                        <input class="form-control" id="kh-phone" name="Input.Phone" type="tel" maxlength="10" pattern="0[0-9]{9}" required autocomplete="tel" value="@Model.Input.Phone" />
                         @Html.ValidationMessage("Input.Phone", null, new { @class = "text-danger small" })</div>
-                    <div class="col-12 col-md-6"><label class="form-label fw-semibold" for="hao-email">Email (không bắt buộc)</label>
-                        <input class="form-control" id="hao-email" name="Input.Email" type="email" maxlength="150" autocomplete="email" value="@Model.Input.Email" />
+                    <div class="col-12 col-md-6"><label class="form-label fw-semibold" for="kh-email">Email (không bắt buộc)</label>
+                        <input class="form-control" id="kh-email" name="Input.Email" type="email" maxlength="150" autocomplete="email" value="@Model.Input.Email" />
                         @Html.ValidationMessage("Input.Email", null, new { @class = "text-danger small" })</div>
                 </div>
-                <div class="mb-4"><label class="form-label fw-semibold" for="hao-address">Địa chỉ nhận hàng <span class="text-danger">*</span></label>
-                    <textarea class="form-control" id="hao-address" name="Input.Address" rows="4" minlength="5" maxlength="250" required autocomplete="street-address">@Model.Input.Address</textarea>
+                <div class="mb-4"><label class="form-label fw-semibold" for="kh-address">Địa chỉ nhận hàng <span class="text-danger">*</span></label>
+                    <textarea class="form-control" id="kh-address" name="Input.Address" rows="4" minlength="5" maxlength="250" required autocomplete="street-address">@Model.Input.Address</textarea>
                     @Html.ValidationMessage("Input.Address", null, new { @class = "text-danger small" })</div>
                 <div class="alert alert-info small">Chưa thanh toán trực tuyến. Nhân viên sẽ tiếp nhận, xác nhận thanh toán và quản lý duyệt xuất trên Desktop.</div>
                 <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold">Xác nhận đặt hàng</button>
@@ -37,7 +37,7 @@
         </div></div>
     </div>
     <aside class="col-12 col-lg-5" aria-label="Tóm tắt đơn hàng">
-        <div class="card hao-card"><div class="card-body p-4">
+        <div class="card kh-card"><div class="card-body p-4">
             <h2 class="h5 fw-bold mb-3">Đơn hàng của bạn</h2>
             @foreach (var item in Model.Cart.Lines)
             {
@@ -47,7 +47,7 @@
                 </div>
             }
             <div class="d-flex align-items-center justify-content-between mt-4 gap-2">
-                <span class="fw-semibold">Tổng cộng</span><strong class="hao-price fs-4 text-nowrap">@Model.Cart.TotalVnd.ToString("N0") đ</strong>
+                <span class="fw-semibold">Tổng cộng</span><strong class="kh-price fs-4 text-nowrap">@Model.Cart.TotalVnd.ToString("N0") đ</strong>
             </div>
             <a class="d-inline-block mt-3 small" href="/gio-hang">Quay lại giỏ hàng</a>
         </div></div>

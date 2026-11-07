@@ -1,12 +1,12 @@
-@model Catalog.Web.Features.Hao.HaoLoginInput
+@model Catalog.Web.Features.BanHang.ThongTinDangNhap
 @{
-    Layout = "~/Views/Shared/_HaoLayout.cshtml";
+    Layout = "~/Views/Shared/_GiaoDienKhachHang.cshtml";
     ViewData["Title"] = "Đăng nhập";
     var returnUrl = Context.Request.Query["ReturnUrl"].ToString();
 }
-<div class="hao-auth-width mx-auto">
-    <div class="card hao-card"><div class="card-body p-4 p-lg-5">
-        <div class="hao-eyebrow mb-2">TÀI KHOẢN KHÁCH HÀNG</div>
+<div class="kh-auth-width mx-auto">
+    <div class="card kh-card"><div class="card-body p-4 p-lg-5">
+        <div class="kh-eyebrow mb-2">TÀI KHOẢN KHÁCH HÀNG</div>
         <h1 class="h2 fw-bold mb-2">Đăng nhập</h1>
         <p class="text-secondary small mb-4">Đăng nhập để xem lịch sử đơn hàng của bạn.</p>
         <form method="post" action="/tai-khoan/dang-nhap">
@@ -14,13 +14,13 @@
             <input type="hidden" name="returnUrl" value="@returnUrl" />
             @Html.ValidationSummary(true, "", new { @class = "text-danger small mb-3" })
             <div class="mb-3">
-                <label class="form-label fw-semibold" for="hao-login-email">Email</label>
-                <input class="form-control" id="hao-login-email" name="Email" type="email" value="@Model.Email" maxlength="150" autocomplete="email" required />
+                <label class="form-label fw-semibold" for="kh-login-email">Email</label>
+                <input class="form-control" id="kh-login-email" name="Email" type="email" value="@Model.Email" maxlength="150" autocomplete="email" required />
                 @Html.ValidationMessage("Email", null, new { @class = "text-danger small" })
             </div>
             <div class="mb-4">
-                <label class="form-label fw-semibold" for="hao-login-password">Mật khẩu</label>
-                <input class="form-control" id="hao-login-password" name="Password" type="password" autocomplete="current-password" required />
+                <label class="form-label fw-semibold" for="kh-login-password">Mật khẩu</label>
+                <input class="form-control" id="kh-login-password" name="Password" type="password" autocomplete="current-password" required />
                 @Html.ValidationMessage("Password", null, new { @class = "text-danger small" })
             </div>
             <button class="btn btn-primary w-100 py-2 fw-semibold" type="submit">Đăng nhập</button>

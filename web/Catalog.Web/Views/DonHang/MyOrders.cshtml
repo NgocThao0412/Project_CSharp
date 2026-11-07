@@ -1,15 +1,15 @@
-@model System.Collections.Generic.IReadOnlyList<Catalog.Web.Features.Hao.HaoOrderView>
+@model System.Collections.Generic.IReadOnlyList<Catalog.Web.Features.BanHang.DonHangViewModel>
 @{
-    Layout = "~/Views/Shared/_HaoLayout.cshtml";
+    Layout = "~/Views/Shared/_GiaoDienKhachHang.cshtml";
     ViewData["Title"] = "Lịch sử đơn hàng";
 }
 <div class="d-flex justify-content-between align-items-end flex-wrap gap-3 mb-4">
-    <div><div class="hao-eyebrow mb-2">TÀI KHOẢN CỦA BẠN</div><h1 class="h2 fw-bold mb-1">Lịch sử đơn hàng</h1><p class="text-secondary mb-0">Chỉ hiển thị các đơn được đặt khi đã đăng nhập (dữ liệu demo).</p></div>
+    <div><div class="kh-eyebrow mb-2">TÀI KHOẢN CỦA BẠN</div><h1 class="h2 fw-bold mb-1">Lịch sử đơn hàng</h1><p class="text-secondary mb-0">Chỉ hiển thị các đơn được đặt khi đã đăng nhập (dữ liệu demo).</p></div>
     <a class="btn btn-outline-primary" href="/don-hang/tra-cuu">Tra cứu bằng mã</a>
 </div>
 @if (Model.Count == 0)
 {
-    <div class="card hao-card text-center py-5"><div class="card-body">
+    <div class="card kh-card text-center py-5"><div class="card-body">
         <h2 class="h4 fw-bold">Bạn chưa có đơn hàng</h2>
         <p class="text-secondary">Khám phá linh kiện và đặt hàng khi đang đăng nhập.</p>
         <a class="btn btn-primary" href="/">Xem sản phẩm</a>
@@ -17,13 +17,13 @@
 }
 else
 {
-    <div class="card hao-card overflow-hidden"><div class="table-responsive">
-        <table class="table table-hover align-middle mb-0 hao-table">
+    <div class="card kh-card overflow-hidden"><div class="table-responsive">
+        <table class="table table-hover align-middle mb-0 kh-table">
             <thead class="table-light"><tr><th>Mã đơn</th><th>Ngày tạo (GMT+7)</th><th>Số mặt hàng</th><th>Trạng thái</th><th>Tổng tiền</th></tr></thead>
             <tbody>
             @foreach (var order in Model)
             {
-                <tr><td class="fw-semibold">@order.Code</td><td>@order.CreatedAtUtc.ToOffset(TimeSpan.FromHours(7)).ToString("dd/MM/yyyy HH:mm")</td><td>@order.Lines.Count</td><td>@Catalog.Web.Features.Hao.HaoStatuses.Display(order.Status)</td><td class="fw-bold text-nowrap">@order.TotalVnd.ToString("N0") đ</td></tr>
+                <tr><td class="fw-semibold">@order.Code</td><td>@order.CreatedAtUtc.ToOffset(TimeSpan.FromHours(7)).ToString("dd/MM/yyyy HH:mm")</td><td>@order.Lines.Count</td><td>@Catalog.Web.Features.BanHang.TrangThaiDonHang.Display(order.Status)</td><td class="fw-bold text-nowrap">@order.TotalVnd.ToString("N0") đ</td></tr>
             }
             </tbody>
         </table>
