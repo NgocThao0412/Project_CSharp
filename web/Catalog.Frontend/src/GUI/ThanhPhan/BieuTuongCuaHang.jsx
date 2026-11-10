@@ -8,6 +8,7 @@ export default function ShopIcon({ name, size = 20, strokeWidth = 1.9, ...props 
     phone: <path d="M7.1 2.8 4.6 4.3c-1.6 1-1.9 2.8-1.2 4.8 2.1 6 6.8 10.8 12.8 12.8 2 .7 3.8.3 4.8-1.2l1.5-2.5-4.6-3.1-2.2 2.1a17.2 17.2 0 0 1-7.1-7.1l2.1-2.2-3.1-4.6Z" />,
     cart: <><circle cx="9" cy="20" r="1" /><circle cx="19" cy="20" r="1" /><path d="M2 3h2l3.1 13h12.1l2.4-9H5" /></>,
     user: <><circle cx="12" cy="8" r="4" /><path d="M4 21v-2a8 8 0 0 1 16 0v2" /></>,
+    logout: <><path d="M10 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h5" /><path d="M13 8l5 4-5 4M8 12h10" /></>,
     list: <><path d="M9 6h13M9 12h13M9 18h13" /><circle cx="4" cy="6" r="1" /><circle cx="4" cy="12" r="1" /><circle cx="4" cy="18" r="1" /></>,
     filter: <><path d="M3 5h18l-7 8v6l-4 2v-8z" /></>,
     reset: <><path d="M3 11a9 9 0 1 1 2.5 6.5" /><path d="M3 4v7h7" /></>,

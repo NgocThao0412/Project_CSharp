@@ -1,11 +1,13 @@
 using Catalog.Web.BUS;
 using Catalog.Web.DTO;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.Data.SqlClient;
 
 namespace Catalog.Web.Controllers;
 
 [ApiController]
+[Authorize]
 [Route("api/gio-hang")]
 public sealed class GioHangApiController(GioHangBUS gioHang, ILogger<GioHangApiController> log) : ControllerBase
 {

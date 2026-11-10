@@ -54,7 +54,7 @@ export default function DatHang() {
   return <div className="wrap section web-customer-page web-checkout">
     <div className="breadcrumb"><Link to="/">Trang chủ</Link> / <Link to="/gio-hang">Giỏ hàng</Link> / Đặt hàng</div>
     <h1>Thông tin đặt hàng</h1>
-    <p className="muted">Kiểm tra đơn hàng và nhập thông tin giao nhận. Bạn có thể đặt hàng không cần tài khoản.</p>
+    <p className="muted">Kiểm tra đơn hàng và nhập thông tin giao nhận.</p>
     {loi && <div className="web-error" role="alert">{loi} <Link to="/gio-hang">Kiểm tra giỏ hàng</Link></div>}
     {!gio && !loi && <p>Đang tải giỏ hàng...</p>}
     {gio?.items?.length === 0 && <div className="web-empty"><h2>Giỏ hàng đang trống</h2><Link className="web-primary" to="/san-pham">Xem sản phẩm</Link></div>}

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useSearchParams, useOutletContext } from 'react-router-dom';
 import { useApi } from '../API/GoiAPI.js';
 import ProductCard from './ThanhPhan/TheSanPham.jsx';
 import LoadState from './ThanhPhan/TrangThaiTaiDuLieu.jsx';
@@ -10,6 +10,7 @@ import { themGioHang } from '../API/GioHangAPI.js';
 export default function ProductsPage() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { daDangNhap, yeuCauDangNhap } = useOutletContext();
   const [params] = useSearchParams();
   const q = params.get('q') ?? '';
   const category = params.get('category') ?? '';
@@ -58,6 +59,7 @@ export default function ProductsPage() {
   }
 
   async function themVaoGio(item) {
+    if (!daDangNhap) { yeuCauDangNhap('gio-hang'); return; }
     try {
       await themGioHang(item.id);
       setNotice(`Đã thêm ${item.name} vào giỏ hàng.`);

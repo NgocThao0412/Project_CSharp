@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useOutletContext, useParams } from 'react-router-dom';
 import { money, useApi } from '../API/GoiAPI.js';
 import LoadState from './ThanhPhan/TrangThaiTaiDuLieu.jsx';
 import { getProductImage, onProductImageError } from '../config/HinhAnhSanPham.js';
@@ -7,9 +7,11 @@ import { themGioHang } from '../API/GioHangAPI.js';
 
 export default function ProductDetailsPage() {
   const { id } = useParams();
+  const { daDangNhap, yeuCauDangNhap } = useOutletContext();
   const [thongBao, setThongBao] = useState('');
   const [dangXuLy, setDangXuLy] = useState(false);
   async function them() {
+    if (!daDangNhap) { yeuCauDangNhap('gio-hang'); return; }
     setDangXuLy(true);
     try { await themGioHang(Number(id)); setThongBao('Đã thêm sản phẩm vào giỏ hàng.'); }
     catch (err) { setThongBao(err.message); }
@@ -40,7 +42,7 @@ export default function ProductDetailsPage() {
             <button className="web-primary" type="button" disabled={dangXuLy || product.availableQuantity <= 0} onClick={them}>
               {dangXuLy ? 'Đang thêm...' : 'Thêm vào giỏ hàng'}
             </button>
-            <Link className="web-secondary" to="/gio-hang">Xem giỏ hàng</Link>
+            <Link className="web-secondary" to="/gio-hang" onClick={e => { if (!daDangNhap) { e.preventDefault(); yeuCauDangNhap('gio-hang'); } }}>Xem giỏ hàng</Link>
           </div>
           {thongBao && <p className="web-info" role="status">{thongBao}</p>}
           <h2>Mô tả sản phẩm</h2><p>{product.description}</p>

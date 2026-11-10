@@ -1,11 +1,14 @@
 using Catalog.Web.BUS;
 using Catalog.Web.DTO;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 using Microsoft.Data.SqlClient;
 
 namespace Catalog.Web.Controllers;
 
 [ApiController]
+[Authorize]
 [Route("api/don-hang")]
 public sealed class DatHangApiController(DatHangBUS datHang, ILogger<DatHangApiController> log) : ControllerBase
 {
@@ -14,7 +17,9 @@ public sealed class DatHangApiController(DatHangBUS datHang, ILogger<DatHangApiC
     {
         try
         {
-            var don = await datHang.DatAsync(thongTin, ct);
+            if (!int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var maKhach))
+                return Unauthorized();
+            var don = await datHang.DatAsync(thongTin, maKhach, ct);
             return Ok(don);
         }
         catch (LoiDatHangException ex)

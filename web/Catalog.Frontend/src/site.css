@@ -528,3 +528,24 @@
 .web-success-actions{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin-top:24px}
 @media(max-width:900px){.web-checkout-grid{grid-template-columns:1fr}}
 @media(max-width:560px){.web-checkout-card{padding:20px}.web-checkout-fields{grid-template-columns:1fr}.web-success-order{grid-template-columns:1fr}.web-checkout-success{padding:28px 18px}}
+
+.web-account-card.web-account-register { width: min(100%, 940px); }
+.web-account-columns { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 34px; }
+.web-account-column { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+.web-account-register form > .web-primary { width: 100%; }
+.shop-account-greeting { display: inline-flex; align-items: center; gap: 8px; color: #0c2452; font-size: 13px; font-weight: 700; white-space: nowrap; min-width: 0; }
+.shop-account-greeting span { max-width: 146px; overflow: hidden; text-overflow: ellipsis; }
+.shop-logout-icon { border: 1px solid #075cef; background: #fff; color: #075cef; cursor: pointer; width: 39px; height: 39px; }
+.shop-logout-icon:hover { background: #eef5ff; }
+.web-login-overlay { position: fixed; inset: 0; z-index: 1000; background: rgba(13, 28, 53, .5); display: grid; place-items: center; padding: 18px; }
+.web-login-dialog { width: min(100%, 430px); position: relative; text-align: center; border-radius: 15px; background: #fff; padding: 34px 27px 29px; box-shadow: 0 18px 50px rgba(8, 27, 60, .2); }
+.web-login-close { position: absolute; top: 12px; right: 15px; background: none; border: 0; color: #52627c; font: inherit; font-size: 27px; cursor: pointer; }
+.web-login-icon { margin: 0 auto 18px; width: 64px; height: 64px; display: grid; place-items: center; border-radius: 50%; background: #eaf2ff; color: #075cef; }
+.web-login-dialog h2 { margin: 0 0 26px; font-size: 20px; line-height: 1.5; color: #0d2149; }
+.web-login-actions { display: flex; justify-content: center; gap: 12px; }
+.web-login-actions a { flex: 1; padding: 10px 15px; }
+@media (max-width: 760px) {
+  .web-account-columns { grid-template-columns: 1fr; gap: 18px; }
+  .web-account-card.web-account-register { padding: 24px; }
+  .shop-account-greeting span { max-width: 110px; }
+}

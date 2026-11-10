@@ -7,16 +7,17 @@ namespace Catalog.Web.DAO;
 
 public sealed class DonHangDAO(KetNoi ketNoi)
 {
-    public async Task<DonHangDTO?> TraCuuAsync(int maDon, string soDienThoai, CancellationToken ct = default)
+    public async Task<DonHangDTO?> TraCuuAsync(int maKhach, int maDon, string soDienThoai, CancellationToken ct = default)
     {
-        if (maDon <= 0 || string.IsNullOrWhiteSpace(soDienThoai)) return null;
+        if (maKhach <= 0 || maDon <= 0 || string.IsNullOrWhiteSpace(soDienThoai)) return null;
         await using var db = await ketNoi.MoAsync(ct);
         await using var lenh = new SqlCommand(@"
             SELECT px.MPX, kh.HOTEN, px.TG, px.TT, px.TIEN
             FROM dbo.PHIEUXUAT px
             INNER JOIN dbo.KHACHHANG kh ON px.MKH = kh.MKH
-            WHERE px.MPX = @ma AND kh.SDT = @sdt", db);
+            WHERE px.MPX = @ma AND px.MKH = @khach AND kh.SDT = @sdt", db);
         lenh.Parameters.Add("@ma", SqlDbType.Int).Value = maDon;
+        lenh.Parameters.Add("@khach", SqlDbType.Int).Value = maKhach;
         lenh.Parameters.Add("@sdt", SqlDbType.NVarChar, 11).Value = soDienThoai.Trim();
 
         int ma, trangThai;

@@ -13,7 +13,7 @@ public sealed class DatHangDAO(KetNoi ketNoi, IConfiguration cauHinh)
         => new(sql, db, tran);
 
     public async Task<KetQuaDatHangDTO> TaoDonAsync(YeuCauDatHangDTO yeuCau,
-        IReadOnlyList<MucGioHangDTO> gio, CancellationToken ct = default)
+        IReadOnlyList<MucGioHangDTO> gio, int maKhach, CancellationToken ct = default)
     {
         await using var db = await ketNoi.MoAsync(ct);
         await using var tran = (SqlTransaction)await db.BeginTransactionAsync(IsolationLevel.Serializable, ct);
@@ -25,9 +25,10 @@ public sealed class DatHangDAO(KetNoi ketNoi, IConfiguration cauHinh)
                 SELECT px.MPX, px.TIEN, px.TG
                 FROM dbo.DONHANGWEB dw WITH (UPDLOCK, HOLDLOCK)
                 JOIN dbo.PHIEUXUAT px ON px.MPX = dw.MPX
-                WHERE dw.MAYEUCAU = @yeuCau", db, tran))
+                WHERE dw.MAYEUCAU = @yeuCau AND px.MKH = @khach", db, tran))
             {
                 trung.Parameters.Add("@yeuCau", SqlDbType.UniqueIdentifier).Value = yeuCau.MaYeuCau;
+                trung.Parameters.Add("@khach", SqlDbType.Int).Value = maKhach;
                 await using (var r = await trung.ExecuteReaderAsync(ct))
                 {
                     if (await r.ReadAsync(ct))
@@ -41,7 +42,14 @@ public sealed class DatHangDAO(KetNoi ketNoi, IConfiguration cauHinh)
                 return donDaCo;
             }
 
-            var maKhach = await TimHoacTaoKhachAsync(db, tran, yeuCau, ct);
+            await using (var kiemTraKhach = Lenh(@"
+                SELECT COUNT(1) FROM dbo.KHACHHANG
+                WHERE MKH = @khach AND TT = 1 AND TENDANGNHAP IS NOT NULL", db, tran))
+            {
+                kiemTraKhach.Parameters.Add("@khach", SqlDbType.Int).Value = maKhach;
+                if (Convert.ToInt32(await kiemTraKhach.ExecuteScalarAsync(ct)) == 0)
+                    throw new LoiDatHangException("Tài khoản khách hàng không còn hoạt động.");
+            }
             var danhSach = new List<(int Ma, int Luong, int Gia)>();
             long tongTien = 0;
             foreach (var item in gio.OrderBy(x => x.MaSanPham))
@@ -133,27 +141,4 @@ public sealed class DatHangDAO(KetNoi ketNoi, IConfiguration cauHinh)
         }
     }
 
-    private static async Task<int> TimHoacTaoKhachAsync(SqlConnection db, SqlTransaction tran,
-        YeuCauDatHangDTO yeuCau, CancellationToken ct)
-    {
-        await using (var tim = Lenh(@"
-            SELECT MKH FROM dbo.KHACHHANG WITH (UPDLOCK, HOLDLOCK)
-            WHERE SDT = @sdt", db, tran))
-        {
-            tim.Parameters.Add("@sdt", SqlDbType.NVarChar, 11).Value = yeuCau.SoDienThoai;
-            var cu = await tim.ExecuteScalarAsync(ct);
-            // Khach da ton tai: khong sua thong tin tai khoan cua nguoi khac.
-            // Dia chi/nguoi nhan tung don duoc luu rieng trong DONHANGWEB.
-            if (cu is not null && cu != DBNull.Value) return Convert.ToInt32(cu);
-        }
-        await using var tao = Lenh(@"
-            INSERT INTO dbo.KHACHHANG (HOTEN, NGAYTHAMGIA, DIACHI, SDT, EMAIL, TT)
-            OUTPUT INSERTED.MKH
-            VALUES (@ten, CONVERT(date, SYSDATETIME()), @diaChi, @sdt, @email, 1)", db, tran);
-        tao.Parameters.Add("@ten", SqlDbType.NVarChar, 255).Value = yeuCau.HoTen;
-        tao.Parameters.Add("@diaChi", SqlDbType.NVarChar, 255).Value = yeuCau.DiaChi;
-        tao.Parameters.Add("@sdt", SqlDbType.NVarChar, 11).Value = yeuCau.SoDienThoai;
-        tao.Parameters.Add("@email", SqlDbType.NVarChar, 50).Value = (object?)yeuCau.Email ?? DBNull.Value;
-        return Convert.ToInt32(await tao.ExecuteScalarAsync(ct));
-    }
 }

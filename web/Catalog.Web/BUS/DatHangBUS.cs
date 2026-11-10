@@ -6,8 +6,11 @@ namespace Catalog.Web.BUS;
 // Kiem tra nghiep vu o C#; database se tinh lai gia, ton kho trong transaction.
 public sealed class DatHangBUS(GioHangBUS gioHang, DatHangDAO donHang)
 {
-    public async Task<KetQuaDatHangDTO> DatAsync(YeuCauDatHangDTO yeuCau, CancellationToken ct = default)
+    public async Task<KetQuaDatHangDTO> DatAsync(YeuCauDatHangDTO yeuCau, int maKhach, CancellationToken ct = default)
     {
+        if (maKhach <= 0)
+            throw new LoiDatHangException("Vui lòng đăng nhập để đặt hàng.");
+
         if (yeuCau.MaYeuCau == Guid.Empty)
             throw new LoiDatHangException("Mã xác nhận không hợp lệ. Vui lòng tải lại trang đặt hàng.");
 
@@ -29,7 +32,7 @@ public sealed class DatHangBUS(GioHangBUS gioHang, DatHangDAO donHang)
             throw new LoiDatHangException("Giỏ hàng có số lượng không hợp lệ.");
 
         // Khong tin gia/ton kho tu frontend, ma san pham duoc lay tu Session cua may chu.
-        var ketQua = await donHang.TaoDonAsync(yeuCau, ds, ct);
+        var ketQua = await donHang.TaoDonAsync(yeuCau, ds, maKhach, ct);
         gioHang.XoaSauDatHang();
         return ketQua;
     }
