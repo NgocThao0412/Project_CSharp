@@ -501,6 +501,12 @@ INSERT [dbo].[KHACHHANG] ([MKH], [HOTEN], [NGAYTHAMGIA], [DIACHI], [SDT], [EMAIL
 INSERT [dbo].[KHACHHANG] ([MKH], [HOTEN], [NGAYTHAMGIA], [DIACHI], [SDT], [EMAIL], [TT]) VALUES (18, N'Khach hang mau 18', CAST(N'2024-04-17' AS Date), N'Dia chi mau 18', N'0900000018', NULL, 1)
 SET IDENTITY_INSERT [dbo].[KHACHHANG] OFF
 GO
+INSERT [dbo].[KHACHHANG]
+    ([HOTEN], [NGAYTHAMGIA], [DIACHI], [SDT], [EMAIL], [TENDANGNHAP], [MATKHAU], [TINHTHANHPHO], [PHUONGXA], [TT])
+VALUES
+    (N'Khách hàng mẫu 01', CONVERT(date, SYSDATETIME()), N'123 Nguyễn Trãi', N'0912345678',
+     N'khachhang01@example.com', N'khachhang01', N'PBKDF2$220000$YeT5BSn2dmjAkgK5tS118w==$OX9Gw0WgTGV3Kra+WoxbrsbZIv9XHB8E67dLWgViycM=', N'Thành phố Hồ Chí Minh', N'Phường Bến Thành', 1);
+GO
 SET IDENTITY_INSERT [dbo].[KHUVUCKHO] ON 
 
 INSERT [dbo].[KHUVUCKHO] ([MKVK], [TEN], [GHICHU], [TT]) VALUES (1, N'Khu vực A - Hàng công nghệ cao', N'Lưu trữ Laptop, Điện thoại, Máy tính bảng, Màn hình LCD', 1)

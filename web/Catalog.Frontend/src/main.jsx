@@ -27,6 +27,7 @@ createRoot(document.getElementById('root')).render(
           <Route path="dat-hang/thanh-cong" element={<DatHangThanhCong />} />
           <Route path="tai-khoan/dang-nhap" element={<TaiKhoan />} />
           <Route path="tai-khoan/dang-ky" element={<TaiKhoan />} />
+          <Route path="tai-khoan/thong-tin" element={<TaiKhoan />} />
           <Route path="don-hang/tra-cuu" element={<TraCuuDonHang />} />
           <Route path="*" element={<NotFoundPage />} />
         </Route>

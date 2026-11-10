@@ -1,12 +1,13 @@
 import { useState } from 'react';
-import { Link, useOutletContext, useParams } from 'react-router-dom';
+import { Link, useNavigate, useOutletContext, useParams } from 'react-router-dom';
 import { money, useApi } from '../API/GoiAPI.js';
 import LoadState from './ThanhPhan/TrangThaiTaiDuLieu.jsx';
 import { getProductImage, onProductImageError } from '../config/HinhAnhSanPham.js';
-import { themGioHang } from '../API/GioHangAPI.js';
+import { themGioHang, muaNgaySanPham } from '../API/GioHangAPI.js';
 
 export default function ProductDetailsPage() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const { daDangNhap, yeuCauDangNhap } = useOutletContext();
   const [thongBao, setThongBao] = useState('');
   const [dangXuLy, setDangXuLy] = useState(false);
@@ -15,6 +16,16 @@ export default function ProductDetailsPage() {
     setDangXuLy(true);
     try { await themGioHang(Number(id)); setThongBao('Đã thêm sản phẩm vào giỏ hàng.'); }
     catch (err) { setThongBao(err.message); }
+    finally { setDangXuLy(false); }
+  }
+  async function muaNgay() {
+    if (!daDangNhap) { yeuCauDangNhap('gio-hang'); return; }
+    setDangXuLy(true);
+    setThongBao('');
+    try {
+      await muaNgaySanPham(Number(id));
+      navigate('/dat-hang?mua-ngay=1');
+    } catch (err) { setThongBao(err.message); }
     finally { setDangXuLy(false); }
   }
   const validId = /^\d+$/.test(id ?? '') && Number(id) > 0;
@@ -42,7 +53,7 @@ export default function ProductDetailsPage() {
             <button className="web-primary" type="button" disabled={dangXuLy || product.availableQuantity <= 0} onClick={them}>
               {dangXuLy ? 'Đang thêm...' : 'Thêm vào giỏ hàng'}
             </button>
-            <Link className="web-secondary" to="/gio-hang" onClick={e => { if (!daDangNhap) { e.preventDefault(); yeuCauDangNhap('gio-hang'); } }}>Xem giỏ hàng</Link>
+            <button className="web-secondary" type="button" disabled={dangXuLy || product.availableQuantity <= 0} onClick={muaNgay}>Mua ngay</button>
           </div>
           {thongBao && <p className="web-info" role="status">{thongBao}</p>}
           <h2>Mô tả sản phẩm</h2><p>{product.description}</p>

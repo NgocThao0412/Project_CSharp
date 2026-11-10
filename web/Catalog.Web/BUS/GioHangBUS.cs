@@ -7,14 +7,15 @@ namespace Catalog.Web.BUS;
 public sealed class GioHangBUS(IHttpContextAccessor truyCap, ISanPhamDAO sanPham)
 {
     private const string Khoa = "GioHangWeb";
+    private const string KhoaMuaNgay = "MuaNgayWeb";
     private ISession Phien => truyCap.HttpContext?.Session
         ?? throw new InvalidOperationException("Chưa bật Session trong Program.cs.");
 
-    private List<MucGioHangDTO> Doc()
+    private List<MucGioHangDTO> Doc(string khoa = Khoa)
     {
         try
         {
-            var json = Phien.GetString(Khoa);
+            var json = Phien.GetString(khoa);
             if (string.IsNullOrWhiteSpace(json)) return new();
             return (JsonSerializer.Deserialize<List<MucGioHangDTO>>(json) ?? new())
                 .Where(x => x.MaSanPham > 0 && x.SoLuong is > 0 and <= 99)
@@ -31,8 +32,18 @@ public sealed class GioHangBUS(IHttpContextAccessor truyCap, ISanPhamDAO sanPham
     private void Luu(List<MucGioHangDTO> gio) => Phien.SetString(Khoa, JsonSerializer.Serialize(gio));
 
     // Session la nguon du lieu gio hang duoc may chu tin cay khi tao don.
-    public IReadOnlyList<MucGioHangDTO> LayMucDaChon() => Doc();
-    public void XoaSauDatHang() => Phien.Remove(Khoa);
+    public IReadOnlyList<MucGioHangDTO> LayMucDaChon(bool muaNgay = false) => Doc(muaNgay ? KhoaMuaNgay : Khoa);
+    public void XoaSauDatHang(bool muaNgay = false) => Phien.Remove(muaNgay ? KhoaMuaNgay : Khoa);
+
+    public async Task<string?> ChonMuaNgayAsync(int ma, CancellationToken ct = default)
+    {
+        if (ma <= 0) return "Sản phẩm không hợp lệ.";
+        var sp = await sanPham.LayTheoMaAsync(ma, ct);
+        if (sp is null) return "Sản phẩm không tồn tại.";
+        if (sp.Ton < 1) return "Sản phẩm tạm hết hàng.";
+        Phien.SetString(KhoaMuaNgay, JsonSerializer.Serialize(new List<MucGioHangDTO> { new(ma, 1) }));
+        return null;
+    }
 
     public async Task<string?> ThemAsync(int ma, int soLuong, CancellationToken ct = default)
     {
@@ -71,10 +82,13 @@ public sealed class GioHangBUS(IHttpContextAccessor truyCap, ISanPhamDAO sanPham
         return null;
     }
 
-    public async Task<TrangGioHangDTO> LayTrangAsync(CancellationToken ct = default)
+    public Task<TrangGioHangDTO> LayTrangAsync(CancellationToken ct = default) => TaoTrangAsync(Doc(), ct);
+    public Task<TrangGioHangDTO> LayMuaNgayAsync(CancellationToken ct = default) => TaoTrangAsync(Doc(KhoaMuaNgay), ct);
+
+    private async Task<TrangGioHangDTO> TaoTrangAsync(IEnumerable<MucGioHangDTO> danhSach, CancellationToken ct)
     {
         var result = new List<DongGioHangDTO>();
-        foreach (var item in Doc())
+        foreach (var item in danhSach)
         {
             var sp = await sanPham.LayTheoMaAsync(item.MaSanPham, ct);
             if (sp is not null) result.Add(new DongGioHangDTO(sp, item.SoLuong));

@@ -48,3 +48,5 @@ export const trangThaiTaiKhoan = () => goiTaiKhoan('/api/tai-khoan/trang-thai');
 export const dangNhapTaiKhoan = thongTin => goiTaiKhoan('/api/tai-khoan/dang-nhap', thongTin);
 export const dangKyTaiKhoan = thongTin => goiTaiKhoan('/api/tai-khoan/dang-ky', thongTin);
 export const dangXuatTaiKhoan = () => goiTaiKhoan('/api/tai-khoan/dang-xuat', {});
+export const layThongTinTaiKhoan = () => goiTaiKhoan('/api/tai-khoan/thong-tin');
+export const capNhatThongTinTaiKhoan = thongTin => goiTaiKhoan('/api/tai-khoan/cap-nhat', thongTin);

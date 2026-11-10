@@ -41,6 +41,33 @@ public sealed class GioHangApiController(GioHangBUS gioHang, ILogger<GioHangApiC
         }
     }
 
+    [HttpGet("mua-ngay")]
+    public async Task<IActionResult> LayMuaNgay(CancellationToken ct)
+    {
+        try { return Ok(DinhDang(await gioHang.LayMuaNgayAsync(ct))); }
+        catch (SqlException ex)
+        {
+            log.LogError(ex, "Không tải được sản phẩm mua ngay.");
+            return Problem("Chưa thể kết nối SQL Server.", statusCode: 503);
+        }
+    }
+
+    [HttpPost("mua-ngay")]
+    public async Task<IActionResult> MuaNgay([FromBody] ThaoTacGioHang thongTin, CancellationToken ct)
+    {
+        try
+        {
+            var loi = await gioHang.ChonMuaNgayAsync(thongTin.ProductId, ct);
+            if (loi is not null) return BadRequest(new { message = loi });
+            return Ok(DinhDang(await gioHang.LayMuaNgayAsync(ct)));
+        }
+        catch (SqlException ex)
+        {
+            log.LogError(ex, "Không chọn được sản phẩm mua ngay.");
+            return Problem("Chưa thể kết nối SQL Server.", statusCode: 503);
+        }
+    }
+
     [HttpPost("them")]
     public async Task<IActionResult> Them([FromBody] ThaoTacGioHang thongTin, CancellationToken ct)
         => await XuLyAsync(() => gioHang.ThemAsync(thongTin.ProductId, thongTin.Quantity, ct), ct);

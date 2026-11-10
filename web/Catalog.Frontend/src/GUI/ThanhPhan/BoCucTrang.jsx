@@ -127,15 +127,16 @@ export default function SiteLayout() {
             {cartCount > 0 && <span className="web-cart-count" aria-label={`${cartCount} sản phẩm trong giỏ`}>{cartCount > 99 ? '99+' : cartCount}</span>}
           </Link>
           {daDangNhap ? <>
-            <span className="shop-account-greeting" title={`Xin chào, ${taiKhoan.tenDangNhap}`}>
+            <Link to="/tai-khoan/thong-tin" className="shop-account-greeting" title="Thông tin tài khoản">
               <ShopIcon name="user" size={26} />
               <span>Xin chào, {taiKhoan.tenDangNhap}</span>
-            </span>
+            </Link>
             <button className="shop-action-icon shop-logout-icon" type="button" onClick={dangXuat}
               aria-label="Đăng xuất" title="Đăng xuất"><ShopIcon name="logout" size={24} /></button>
-          </> : <Link to="/tai-khoan/dang-nhap" className="shop-action-icon" title="Đăng nhập" aria-label="Tài khoản">
-            <ShopIcon name="user" size={26} />
-          </Link>}
+          </> : <>
+            <span className="shop-action-icon" title="Tài khoản" aria-label="Tài khoản"><ShopIcon name="user" size={26} /></span>
+            <Link to="/tai-khoan/dang-nhap" className="shop-login-button">Đăng nhập</Link>
+          </>}
         </div>
       </div>
     </header>

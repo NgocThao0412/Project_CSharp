@@ -30,6 +30,7 @@ public sealed class YeuCauDatHangDTO
 
     // Token do giao dien tao, de tranh ghi trung don neu nguoi dung gui lai yeu cau.
     public Guid MaYeuCau { get; set; }
+    public bool MuaNgay { get; set; }
 }
 
 public sealed record KetQuaDatHangDTO(int MaDon, decimal TongTien, DateTime ThoiGian,

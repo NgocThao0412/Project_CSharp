@@ -29,7 +29,9 @@ public sealed class SanPhamSqlDAO(KetNoi ketNoi) : ISanPhamDAO
     public async Task<IReadOnlyList<SanPhamDTO>> LayNoiBatAsync(int soLuong, CancellationToken ct = default)
     {
         await using var db = await ketNoi.MoAsync(ct);
-        await using var cmd = new SqlCommand($"SELECT TOP (@soLuong) {Cot} FROM dbo.vw_Catalog ORDER BY ProductId DESC", db);
+        await using var cmd = new SqlCommand(
+            $"SELECT TOP (@soLuong) {Cot} FROM dbo.vw_Catalog " +
+            "ORDER BY CASE WHEN AvailableQuantity > 0 THEN 0 ELSE 1 END, NEWID()", db);
         cmd.Parameters.Add("@soLuong", SqlDbType.Int).Value = Math.Clamp(soLuong, 1, 20);
         await using var r = await cmd.ExecuteReaderAsync(ct);
         var result = new List<SanPhamDTO>();

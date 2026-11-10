@@ -1,13 +1,15 @@
 import { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { money } from '../API/GoiAPI.js';
-import { datHang, layGioHang } from '../API/GioHangAPI.js';
+import { datHang, layGioHang, layMuaNgay } from '../API/GioHangAPI.js';
 import { getProductImage, onProductImageError } from '../config/HinhAnhSanPham.js';
 
 const newRequestId = () => crypto.randomUUID();
 
 export default function DatHang() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const muaNgay = new URLSearchParams(location.search).get('mua-ngay') === '1';
   const [gio, setGio] = useState(null);
   const [loi, setLoi] = useState('');
   const [dangGui, setDangGui] = useState(false);
@@ -16,10 +18,11 @@ export default function DatHang() {
 
   useEffect(() => {
     let active = true;
-    layGioHang().then(data => { if (active) setGio(data); })
+    setGio(null);
+    (muaNgay ? layMuaNgay() : layGioHang()).then(data => { if (active) setGio(data); })
       .catch(err => { if (active) setLoi(err.message); });
     return () => { active = false; };
-  }, []);
+  }, [muaNgay]);
 
   function thayDoi(e) {
     const { name, value } = e.target;
@@ -42,6 +45,7 @@ export default function DatHang() {
         ghiChu: form.ghiChu.trim() || null,
         tongTienXacNhan: gio.total,
         maYeuCau,
+        muaNgay,
       });
       navigate('/dat-hang/thanh-cong', { state: ketQua, replace: true });
     } catch (err) {
@@ -52,12 +56,12 @@ export default function DatHang() {
   }
 
   return <div className="wrap section web-customer-page web-checkout">
-    <div className="breadcrumb"><Link to="/">Trang chủ</Link> / <Link to="/gio-hang">Giỏ hàng</Link> / Đặt hàng</div>
+    <div className="breadcrumb"><Link to="/">Trang chủ</Link> / {muaNgay ? <Link to="/san-pham">Sản phẩm</Link> : <Link to="/gio-hang">Giỏ hàng</Link>} / Đặt hàng</div>
     <h1>Thông tin đặt hàng</h1>
     <p className="muted">Kiểm tra đơn hàng và nhập thông tin giao nhận.</p>
-    {loi && <div className="web-error" role="alert">{loi} <Link to="/gio-hang">Kiểm tra giỏ hàng</Link></div>}
+    {loi && <div className="web-error" role="alert">{loi} <Link to={muaNgay ? "/san-pham" : "/gio-hang"}>{muaNgay ? "Chọn sản phẩm" : "Kiểm tra giỏ hàng"}</Link></div>}
     {!gio && !loi && <p>Đang tải giỏ hàng...</p>}
-    {gio?.items?.length === 0 && <div className="web-empty"><h2>Giỏ hàng đang trống</h2><Link className="web-primary" to="/san-pham">Xem sản phẩm</Link></div>}
+    {gio?.items?.length === 0 && <div className="web-empty"><h2>{muaNgay ? 'Chưa chọn sản phẩm mua ngay' : 'Giỏ hàng đang trống'}</h2><Link className="web-primary" to="/san-pham">Xem sản phẩm</Link></div>}
     {gio?.items?.length > 0 && <form className="web-checkout-grid" onSubmit={xacNhan}>
       <section className="web-checkout-card">
         <h2>Thông tin người nhận</h2>
@@ -100,7 +104,7 @@ export default function DatHang() {
         {!gio.available && <div className="web-error" role="alert">Một số sản phẩm không đủ tồn kho, vui lòng cập nhật giỏ hàng.</div>}
         <button className="web-primary web-checkout-submit" type="submit"
           disabled={dangGui || !gio.available}>{dangGui ? 'Đang xác nhận...' : 'Xác nhận đặt hàng'}</button>
-        <Link className="web-secondary" to="/gio-hang">Quay lại giỏ hàng</Link>
+        <Link className="web-secondary" to={muaNgay ? '/san-pham' : '/gio-hang'}>{muaNgay ? 'Tiếp tục xem sản phẩm' : 'Quay lại giỏ hàng'}</Link>
         <p className="muted web-checkout-footnote">Giá và tồn kho được kiểm tra lại ở C# và SQL Server trước khi ghi đơn.</p>
       </aside>
     </form>}

@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using Catalog.Web.DAO;
 using Catalog.Web.BUS;
 using Catalog.Web.DTO;
 using Microsoft.AspNetCore.Authentication;
@@ -11,7 +12,7 @@ namespace Catalog.Web.Controllers;
 
 [ApiController]
 [Route("api/tai-khoan")]
-public sealed class TaiKhoanApiController(TaiKhoanBUS taiKhoan, ILogger<TaiKhoanApiController> log) : ControllerBase
+public sealed class TaiKhoanApiController(TaiKhoanBUS taiKhoan, TaiKhoanDAO dao, ILogger<TaiKhoanApiController> log) : ControllerBase
 {
     [HttpGet("trang-thai")]
     public IActionResult TrangThai()
@@ -83,6 +84,44 @@ public sealed class TaiKhoanApiController(TaiKhoanBUS taiKhoan, ILogger<TaiKhoan
         {
             log.LogError(ex, "Không đăng nhập được tài khoản khách hàng.");
             return Problem("Chưa thể đăng nhập. Vui lòng thử lại sau.", statusCode: 503);
+        }
+    }
+
+    [Authorize]
+    [HttpGet("thong-tin")]
+    public async Task<IActionResult> ThongTin(CancellationToken ct)
+    {
+        if (!int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var maKhach)) return Unauthorized();
+        try
+        {
+            var thongTin = await dao.LayThongTinAsync(maKhach, ct);
+            return thongTin is null ? NotFound(new { message = "Tài khoản không còn hoạt động." }) : Ok(thongTin);
+        }
+        catch (SqlException ex)
+        {
+            log.LogError(ex, "Không đọc được thông tin khách hàng.");
+            return Problem("Không thể tải thông tin khách hàng.", statusCode: 503);
+        }
+    }
+
+    [Authorize]
+    [HttpPost("cap-nhat")]
+    public async Task<IActionResult> CapNhat([FromBody] CapNhatThongTinDTO thongTin, CancellationToken ct)
+    {
+        if (!int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var maKhach)) return Unauthorized();
+        try
+        {
+            if (!await dao.CapNhatAsync(maKhach, thongTin, ct)) return NotFound(new { message = "Tài khoản không còn hoạt động." });
+            return Ok(await dao.LayThongTinAsync(maKhach, ct));
+        }
+        catch (SqlException ex) when (ex.Number is 2601 or 2627)
+        {
+            return Conflict(new { message = "Email hoặc số điện thoại đã được sử dụng." });
+        }
+        catch (SqlException ex)
+        {
+            log.LogError(ex, "Không cập nhật được thông tin khách hàng.");
+            return Problem("Không thể cập nhật thông tin khách hàng.", statusCode: 503);
         }
     }
 

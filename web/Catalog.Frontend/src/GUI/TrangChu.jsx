@@ -1,4 +1,6 @@
-import { Link } from 'react-router-dom';
+import { Link, useOutletContext } from 'react-router-dom';
+import { useState } from 'react';
+import { themGioHang } from '../API/GioHangAPI.js';
 import { useApi } from '../API/GoiAPI.js';
 import ProductCard from './ThanhPhan/TheSanPham.jsx';
 import LoadState from './ThanhPhan/TrangThaiTaiDuLieu.jsx';
@@ -34,7 +36,26 @@ const benefits = [
 ];
 
 export default function HomePage() {
-  const { data, loading, error } = useApi('/api/catalog/featured?count=6');
+  const { data, loading, error } = useApi('/api/catalog/featured?count=8');
+  const { daDangNhap, yeuCauDangNhap } = useOutletContext();
+  const [favorites, setFavorites] = useState(() => new Set());
+  const [notice, setNotice] = useState('');
+
+  function toggleFavorite(id) {
+    setFavorites(old => {
+      const next = new Set(old);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  }
+
+  async function themVaoGio(item) {
+    if (!daDangNhap) { yeuCauDangNhap('gio-hang'); return; }
+    try {
+      await themGioHang(item.id);
+      setNotice(`Đã thêm ${item.name} vào giỏ hàng.`);
+    } catch (err) { setNotice(err.message); }
+  }
 
   return <>
     <section className="store-hero" aria-label="Giới thiệu cửa hàng">
@@ -65,9 +86,14 @@ export default function HomePage() {
           Xem tất cả →
         </Link>
       </div>
+      {notice && <div className="catalog-feedback" role="status">{notice}
+        <button type="button" onClick={() => setNotice('')} aria-label="Đóng thông báo">×</button>
+      </div>}
       <LoadState loading={loading} error={error} />
-      {!loading && !error && <div className="product-grid">
-        {(data ?? []).map(item => <ProductCard key={item.id} product={item} />)}
+      {!loading && !error && <div className="catalog-products-grid">
+        {(data ?? []).map(item => <ProductCard key={item.id} product={item} variant="catalog"
+          isFavorite={favorites.has(item.id)} onToggleFavorite={toggleFavorite}
+          onAddToCart={() => themVaoGio(item)} />)}
       </div>}
     </section>
   </>;

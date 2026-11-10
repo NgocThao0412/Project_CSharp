@@ -70,4 +70,37 @@ public sealed class TaiKhoanDAO(KetNoi ketNoi)
             throw;
         }
     }
+
+    public async Task<ThongTinTaiKhoanDTO?> LayThongTinAsync(int maKhach, CancellationToken ct)
+    {
+        await using var db = await ketNoi.MoAsync(ct);
+        await using var lenh = new SqlCommand(@"
+            SELECT MKH, TENDANGNHAP, HOTEN, EMAIL, SDT, DIACHI, TINHTHANHPHO, PHUONGXA
+            FROM dbo.KHACHHANG WHERE MKH = @ma AND TT = 1 AND TENDANGNHAP IS NOT NULL", db);
+        lenh.Parameters.Add("@ma", SqlDbType.Int).Value = maKhach;
+        await using var r = await lenh.ExecuteReaderAsync(ct);
+        if (!await r.ReadAsync(ct)) return null;
+        string Doc(int i) => r.IsDBNull(i) ? "" : r.GetString(i);
+        return new ThongTinTaiKhoanDTO(r.GetInt32(0), Doc(1), Doc(2), Doc(3),
+            Doc(4), Doc(5), Doc(6), Doc(7));
+    }
+
+    public async Task<bool> CapNhatAsync(int maKhach, CapNhatThongTinDTO thongTin, CancellationToken ct)
+    {
+        await using var db = await ketNoi.MoAsync(ct);
+        await using var lenh = new SqlCommand(@"
+            UPDATE dbo.KHACHHANG
+            SET HOTEN = @ten, EMAIL = @email, SDT = @sdt, DIACHI = @diaChi,
+                TINHTHANHPHO = @tinh, PHUONGXA = @phuong
+            WHERE MKH = @ma AND TT = 1 AND TENDANGNHAP IS NOT NULL", db);
+        lenh.Parameters.Add("@ma", SqlDbType.Int).Value = maKhach;
+        lenh.Parameters.Add("@ten", SqlDbType.NVarChar, 255).Value = thongTin.HoTen.Trim();
+        lenh.Parameters.Add("@email", SqlDbType.NVarChar, 50).Value = thongTin.Email.Trim();
+        lenh.Parameters.Add("@sdt", SqlDbType.NVarChar, 11).Value = thongTin.SoDienThoai.Trim();
+        lenh.Parameters.Add("@diaChi", SqlDbType.NVarChar, 255).Value = thongTin.DiaChi.Trim();
+        lenh.Parameters.Add("@tinh", SqlDbType.NVarChar, 100).Value = thongTin.TinhThanhPho.Trim();
+        lenh.Parameters.Add("@phuong", SqlDbType.NVarChar, 100).Value = thongTin.PhuongXa.Trim();
+        return await lenh.ExecuteNonQueryAsync(ct) == 1;
+    }
+
 }

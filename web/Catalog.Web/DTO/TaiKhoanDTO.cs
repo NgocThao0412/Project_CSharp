@@ -54,3 +54,27 @@ public sealed class DangKyDTO
 public sealed record KhachHangDangNhapDTO(int MaKhach, string TenDangNhap, string HoTen, string MatKhauBam);
 
 public sealed class LoiDangKyException(string thongBao) : Exception(thongBao);
+
+public sealed record ThongTinTaiKhoanDTO(int MaKhach, string TenDangNhap, string HoTen,
+    string Email, string SoDienThoai, string DiaChi, string TinhThanhPho, string PhuongXa);
+
+public sealed class CapNhatThongTinDTO
+{
+    [Required, StringLength(255, MinimumLength = 2)]
+    public string HoTen { get; set; } = "";
+
+    [Required, EmailAddress, StringLength(50)]
+    public string Email { get; set; } = "";
+
+    [Required, RegularExpression(@"^0[0-9]{9}$")]
+    public string SoDienThoai { get; set; } = "";
+
+    [Required, StringLength(255, MinimumLength = 2)]
+    public string DiaChi { get; set; } = "";
+
+    [Required, StringLength(100)]
+    public string TinhThanhPho { get; set; } = "";
+
+    [Required, StringLength(100)]
+    public string PhuongXa { get; set; } = "";
+}

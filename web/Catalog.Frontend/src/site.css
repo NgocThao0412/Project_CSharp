@@ -549,3 +549,26 @@
   .web-account-card.web-account-register { padding: 24px; }
   .shop-account-greeting span { max-width: 110px; }
 }
+
+.web-account-card select { height: 43px; border: 1px solid #cad5e2; border-radius: 7px; padding: 0 12px; width: 100%; background: #fff; color: #101b39; }
+.web-account-card select:focus { outline: 2px solid #98baff; border-color: #075cef; }
+.web-account-card select:disabled { background: #f5f7fb; cursor: not-allowed; }
+.web-account-profile input:disabled { background: #f5f7fb; color: #304563; }
+.web-profile-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+.shop-login-button { border: 1px solid #075cef; color: #075cef; background: #fff; padding: 9px 13px; border-radius: 9px; font-size: 13px; font-weight: 700; white-space: nowrap; }
+.shop-login-button:hover { background: #eef5ff; }
+.web-detail-actions button:disabled { opacity: .55; cursor: not-allowed; }
+
+.web-account-profile-layout { width: min(100%, 1180px); display: grid; grid-template-columns: 225px minmax(0, 1fr); gap: 20px; align-items: start; }
+.web-account-profile-layout .web-account-profile { width: 100%; }
+.web-account-profile-nav { display: flex; flex-direction: column; gap: 9px; padding: 20px 12px; background: #fff; border: 1px solid #dae4f0; border-radius: 14px; }
+.web-account-profile-nav strong { padding: 8px 11px; }
+.web-account-profile-nav a, .web-account-profile-nav button { text-align: left; font: inherit; font-size: 14px; border: 0; border-radius: 8px; color: #172945; background: transparent; padding: 11px; cursor: pointer; }
+.web-account-profile-nav a:hover, .web-account-profile-nav button:hover, .web-account-profile-nav .active { color: #075cef; background: #eaf2ff; }
+@media (max-width: 760px) { .web-account-profile-layout { grid-template-columns: 1fr; } }
+
+@media (max-width: 490px) {
+  .shop-header-actions { flex-wrap: wrap; gap: 8px; }
+  .shop-header-search { order: 2; flex: 1 1 100%; width: 100%; min-width: 0; }
+  .shop-login-button { padding: 7px 9px; font-size: 12px; }
+}
