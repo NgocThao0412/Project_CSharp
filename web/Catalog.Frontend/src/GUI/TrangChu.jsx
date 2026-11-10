@@ -83,7 +83,7 @@ export default function HomePage() {
       <div className="section-heading">
         <div><span className="eyebrow blue">DANH MỤC ĐỀ XUẤT</span><h2>Sản phẩm nổi bật</h2></div>
         <Link to="/san-pham" className="home-view-all">
-          Xem tất cả →
+          Xem tất cả
         </Link>
       </div>
       {notice && <div className="catalog-feedback" role="status">{notice}
