@@ -46,7 +46,7 @@ public sealed class TaiKhoanApiController(TaiKhoanBUS taiKhoan, TaiKhoanDAO dao,
         catch (SqlException ex) when (ex.Number is 207 or 208)
         {
             log.LogError(ex, "Cơ sở dữ liệu chưa có các trường khách hàng Web.");
-            return Problem("Cần chạy database/04_KHACH_HANG_WEB.sql trên database quanlykho.", statusCode: 503);
+            return Problem("Cần đồng bộ dbo.TAIKHOAN (MaTK, MKH) và các cột địa chỉ của dbo.KHACHHANG.", statusCode: 503);
         }
         catch (SqlException ex)
         {
@@ -78,7 +78,7 @@ public sealed class TaiKhoanApiController(TaiKhoanBUS taiKhoan, TaiKhoanDAO dao,
         catch (SqlException ex) when (ex.Number is 207 or 208)
         {
             log.LogError(ex, "Cơ sở dữ liệu chưa có các trường khách hàng Web.");
-            return Problem("Cần chạy database/04_KHACH_HANG_WEB.sql trên database quanlykho.", statusCode: 503);
+            return Problem("Cần đồng bộ dbo.TAIKHOAN (MaTK, MKH) và các cột địa chỉ của dbo.KHACHHANG.", statusCode: 503);
         }
         catch (SqlException ex)
         {
