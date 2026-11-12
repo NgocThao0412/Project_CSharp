@@ -1,71 +1,115 @@
+
 using System;
 
 namespace src.DTO
 {
     public class TaiKhoanDTO
     {
-        public int MNV { get; set; }
-        public string MK { get; set; }
-        public string TDN { get; set; }
+        // Khóa chính của bảng TAIKHOAN
+        public int MaTK { get; set; }
+
+        // Mã nhân viên và mã khách hàng có thể NULL
+        public int? MNV { get; set; }
+        public int? MKH { get; set; }
+
+        public string TDN { get; set; } = string.Empty;
+        public string MK { get; set; } = string.Empty;
         public int MNQ { get; set; }
         public int TT { get; set; }
 
-        public TaiKhoanDTO()
+        // Phân biệt tài khoản nhân viên và khách hàng
+        public string LoaiTaiKhoan
         {
+            get
+            {
+                if (MKH.HasValue)
+                    return "Khách hàng";
 
+                if (MNV.HasValue)
+                    return "Nhân viên";
+
+                return "Chưa xác định";
+            }
         }
 
-        public TaiKhoanDTO(int MNV, string TDN, string MK, int MNQ, int TT)
+        public TaiKhoanDTO()
+        {
+        }
+
+        // Constructor cũ - giữ tương thích với code Desktop
+        public TaiKhoanDTO(
+            int MNV,
+            string TDN,
+            string MK,
+            int MNQ,
+            int TT)
         {
             this.MNV = MNV;
+            this.MKH = null;
             this.TDN = TDN;
             this.MK = MK;
             this.MNQ = MNQ;
             this.TT = TT;
         }
 
-        public override int GetHashCode()
+        // Constructor mới - dùng chung Desktop và Web
+        public TaiKhoanDTO(
+            int maTK,
+            int? mnv,
+            int? mkh,
+            string tdn,
+            string mk,
+            int mnq,
+            int tt)
         {
-            unchecked
-            {
-                int hash = 3;
-                hash = 19 * hash + MNV.GetHashCode();
-                hash = 19 * hash + (TDN != null ? TDN.GetHashCode() : 0);
-                hash = 19 * hash + (MK != null ? MK.GetHashCode() : 0);
-                hash = 19 * hash + MNQ.GetHashCode();
-                hash = 19 * hash + TT.GetHashCode();
-                return hash;
-            }
+            MaTK = maTK;
+            MNV = mnv;
+            MKH = mkh;
+            TDN = tdn;
+            MK = mk;
+            MNQ = mnq;
+            TT = tt;
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
-            if (this == obj)
-            {
+            if (ReferenceEquals(this, obj))
                 return true;
-            }
-            if (obj == null)
-            {
+
+            if (obj is not TaiKhoanDTO other)
                 return false;
-            }
-            if (GetType() != obj.GetType())
-            {
-                return false;
-            }
 
-            TaiKhoanDTO other = (TaiKhoanDTO)obj;
+            // Tài khoản đã lưu: so sánh theo khóa chính
+            if (MaTK > 0 || other.MaTK > 0)
+                return MaTK > 0
+                    && other.MaTK > 0
+                    && MaTK == other.MaTK;
 
-            if (MNV != other.MNV) return false;
-            if (MNQ != other.MNQ) return false;
-            if (TT != other.TT) return false;
+            // Tài khoản chưa lưu
+            return MNV == other.MNV
+                && MKH == other.MKH
+                && TDN == other.TDN
+                && MK == other.MK
+                && MNQ == other.MNQ
+                && TT == other.TT;
+        }
 
-            if (TDN != other.TDN) return false;
-            return MK == other.MK;
+        public override int GetHashCode()
+        {
+            if (MaTK > 0)
+                return MaTK.GetHashCode();
+
+            return HashCode.Combine(
+                MNV, MKH, TDN, MK, MNQ, TT);
         }
 
         public override string ToString()
         {
-            return $"AccountDTO{{ Ma nhan vien ={MNV}, Username ={TDN}, Mat khau={MK}, Ma nhom quyen={MNQ}, Trang thai={TT} }}";
+            // Không đưa mật khẩu hoặc hash vào chuỗi hiển thị
+            return $"MaTK={MaTK}, " +
+                   $"LoaiTaiKhoan={LoaiTaiKhoan}, " +
+                   $"MNV={MNV}, MKH={MKH}, " +
+                   $"TDN={TDN}, MNQ={MNQ}, TT={TT}";
         }
     }
 }

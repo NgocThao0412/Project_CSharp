@@ -27,42 +27,55 @@ namespace src.DAO
         private TaiKhoanDAO() { }
 
         // Chuyển dữ liệu SQL Server thành TaiKhoanDTO
-        private static TaiKhoanDTO ReadTaiKhoan(
-            SqlDataReader rs)
+        private static TaiKhoanDTO ReadTaiKhoan(SqlDataReader rs)
         {
-            int mnv = rs.GetInt32(rs.GetOrdinal("MNV"));
+            int maTK = rs.GetInt32(rs.GetOrdinal("MaTK"));
+
+            int? mnv = rs.IsDBNull(rs.GetOrdinal("MNV"))
+                ? null
+                : rs.GetInt32(rs.GetOrdinal("MNV"));
+
+            int? mkh = rs.IsDBNull(rs.GetOrdinal("MKH"))
+                ? null
+                : rs.GetInt32(rs.GetOrdinal("MKH"));
+
             string tdn = rs.GetString(rs.GetOrdinal("TDN"));
             string mk = rs.GetString(rs.GetOrdinal("MK"));
             int mnq = rs.GetInt32(rs.GetOrdinal("MNQ"));
             int tt = rs.GetInt32(rs.GetOrdinal("TT"));
 
-            return new TaiKhoanDTO(mnv, tdn, mk, mnq, tt);
+            return new TaiKhoanDTO(
+                maTK, mnv, mkh, tdn, mk, mnq, tt
+            );
         }
 
-        // 1. Thêm tài khoản
-        // Mật khẩu t.MK đã được BCrypt ở tầng BUS/GUI
+        // 1. Thêm tài khoản nhân viên
+        // Mật khẩu đã được BCrypt ở tầng BUS
         public int insert(TaiKhoanDTO t)
         {
             try
             {
+                if (!t.MNV.HasValue)
+                    return 0;
+
                 using (SqlConnection conn =
                     SqlServerHelper.GetConnection())
                 {
                     const string sql = @"
-                        INSERT INTO TAIKHOAN
-                            (MNV, TDN, MK, MNQ, TT)
+                        INSERT INTO dbo.TAIKHOAN
+                            (MNV, MKH, TDN, MK, MNQ, TT)
                         VALUES
-                            (@mnv, @tdn, @mk, @mnq, @tt)";
+                            (@mnv, NULL, @tdn, @mk, @mnq, @tt)";
 
                     using (SqlCommand cmd =
                         new SqlCommand(sql, conn))
                     {
                         cmd.Parameters.Add(
                             "@mnv", SqlDbType.Int
-                        ).Value = t.MNV;
+                        ).Value = t.MNV.Value;
 
                         cmd.Parameters.Add(
-                            "@tdn", SqlDbType.NVarChar, 100
+                            "@tdn", SqlDbType.NVarChar, 255
                         ).Value = t.TDN;
 
                         cmd.Parameters.Add(
@@ -85,47 +98,53 @@ namespace src.DAO
             {
                 Console.WriteLine(
                     "Lỗi Insert TaiKhoan: " + ex.Message);
+
                 return 0;
             }
         }
 
-        // 2. Cập nhật thông tin tài khoản
-        // Giữ nguyên cơ chế: t.MK là mật khẩu đã băm
+        // 2. Cập nhật tài khoản theo MaTK
         public int update(TaiKhoanDTO t)
         {
             try
             {
+                if (t.MaTK <= 0)
+                    return 0;
+
                 using (SqlConnection conn =
                     SqlServerHelper.GetConnection())
                 {
                     const string sql = @"
-                        UPDATE TAIKHOAN
+                        UPDATE dbo.TAIKHOAN
                         SET TDN = @tdn,
                             MK = @mk,
-                            TT = @tt,
-                            MNQ = @mnq
-                        WHERE MNV = @mnv";
+                            MNQ = @mnq,
+                            TT = @tt
+                        WHERE MaTK = @maTK
+                          AND TT <> -1";
 
                     using (SqlCommand cmd =
                         new SqlCommand(sql, conn))
                     {
-                        cmd.Parameters.AddWithValue(
-                            "@tdn", t.TDN);
-
-                        cmd.Parameters.AddWithValue(
-                            "@mk", t.MK);
+                        cmd.Parameters.Add(
+                            "@maTK", SqlDbType.Int
+                        ).Value = t.MaTK;
 
                         cmd.Parameters.Add(
-                            "@tt", SqlDbType.Int
-                        ).Value = t.TT;
+                            "@tdn", SqlDbType.NVarChar, 255
+                        ).Value = t.TDN;
+
+                        cmd.Parameters.Add(
+                            "@mk", SqlDbType.NVarChar, 255
+                        ).Value = t.MK;
 
                         cmd.Parameters.Add(
                             "@mnq", SqlDbType.Int
                         ).Value = t.MNQ;
 
                         cmd.Parameters.Add(
-                            "@mnv", SqlDbType.Int
-                        ).Value = t.MNV;
+                            "@tt", SqlDbType.Int
+                        ).Value = t.TT;
 
                         return cmd.ExecuteNonQuery();
                     }
@@ -135,51 +154,13 @@ namespace src.DAO
             {
                 Console.WriteLine(
                     "Lỗi Update TaiKhoan: " + ex.Message);
+
                 return 0;
             }
         }
 
-        // 3. Cập nhật trạng thái chờ xử lý TT = 2
-        // Chuyển cú pháp UPDATE JOIN của MySQL sang SQL Server
-        public int updateTTCXL(string email)
-        {
-            try
-            {
-                using (SqlConnection conn =
-                    SqlServerHelper.GetConnection())
-                {
-                    const string sql = @"
-                        UPDATE tk
-                        SET tk.TT = 2
-                        FROM TAIKHOAN AS tk
-                        INNER JOIN NHANVIEN AS nv
-                            ON tk.MNV = nv.MNV
-                        WHERE nv.EMAIL = @email";
-
-                    using (SqlCommand cmd =
-                        new SqlCommand(sql, conn))
-                    {
-                        cmd.Parameters.AddWithValue(
-                            "@email", email);
-
-                        return cmd.ExecuteNonQuery();
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(
-                    "Lỗi UpdateTTCXL TaiKhoan: "
-                    + ex.Message);
-                return 0;
-            }
-        }
-
-        // 4. Đổi mật khẩu
-        // BCrypt mật khẩu mới trước khi lưu
-        public void updatePass(
-            string email,
-            string newPassword)
+        // 3. Đổi mật khẩu theo email nhân viên
+        public void updatePass(string email, string newPassword)
         {
             try
             {
@@ -194,19 +175,23 @@ namespace src.DAO
                     const string sql = @"
                         UPDATE tk
                         SET tk.MK = @mk
-                        FROM TAIKHOAN AS tk
-                        INNER JOIN NHANVIEN AS nv
+                        FROM dbo.TAIKHOAN AS tk
+                        INNER JOIN dbo.NHANVIEN AS nv
                             ON tk.MNV = nv.MNV
-                        WHERE nv.EMAIL = @email";
+                        WHERE nv.EMAIL = @email
+                          AND tk.MNV IS NOT NULL
+                          AND tk.TT <> -1";
 
                     using (SqlCommand cmd =
                         new SqlCommand(sql, conn))
                     {
-                        cmd.Parameters.AddWithValue(
-                            "@mk", hashedPassword);
+                        cmd.Parameters.Add(
+                            "@mk", SqlDbType.NVarChar, 255
+                        ).Value = hashedPassword;
 
-                        cmd.Parameters.AddWithValue(
-                            "@email", email);
+                        cmd.Parameters.Add(
+                            "@email", SqlDbType.NVarChar, 255
+                        ).Value = email;
 
                         cmd.ExecuteNonQuery();
                     }
@@ -215,31 +200,36 @@ namespace src.DAO
             catch (Exception ex)
             {
                 Console.WriteLine(
-                    "Lỗi UpdatePass TaiKhoan: "
-                    + ex.Message);
+                    "Lỗi UpdatePass TaiKhoan: " + ex.Message);
+
                 throw;
             }
         }
 
-        // 5. Tìm tài khoản theo email nhân viên
+        // 4. Tìm tài khoản theo email nhân viên
         public TaiKhoanDTO selectByEmail(string email)
         {
             using (SqlConnection conn =
                 SqlServerHelper.GetConnection())
             {
                 const string sql = @"
-                    SELECT tk.MNV, tk.TDN, tk.MK,
-                           tk.MNQ, tk.TT
-                    FROM TAIKHOAN AS tk
-                    INNER JOIN NHANVIEN AS nv
+                    SELECT TOP (1)
+                        tk.MaTK, tk.MNV, tk.MKH,
+                        tk.TDN, tk.MK, tk.MNQ, tk.TT
+                    FROM dbo.TAIKHOAN AS tk
+                    INNER JOIN dbo.NHANVIEN AS nv
                         ON tk.MNV = nv.MNV
-                    WHERE nv.EMAIL = @email";
+                    WHERE nv.EMAIL = @email
+                      AND tk.MNV IS NOT NULL
+                      AND tk.TT <> -1
+                    ORDER BY tk.MaTK";
 
                 using (SqlCommand cmd =
                     new SqlCommand(sql, conn))
                 {
-                    cmd.Parameters.AddWithValue(
-                        "@email", email);
+                    cmd.Parameters.Add(
+                        "@email", SqlDbType.NVarChar, 255
+                    ).Value = email;
 
                     using (SqlDataReader rs =
                         cmd.ExecuteReader())
@@ -253,7 +243,7 @@ namespace src.DAO
             return null;
         }
 
-        // 6. Lưu OTP khôi phục mật khẩu
+        // 5. Lưu OTP khôi phục mật khẩu nhân viên
         public void sendOpt(string email, string otp)
         {
             try
@@ -264,19 +254,23 @@ namespace src.DAO
                     const string sql = @"
                         UPDATE tk
                         SET tk.OTP = @otp
-                        FROM TAIKHOAN AS tk
-                        INNER JOIN NHANVIEN AS nv
+                        FROM dbo.TAIKHOAN AS tk
+                        INNER JOIN dbo.NHANVIEN AS nv
                             ON tk.MNV = nv.MNV
-                        WHERE nv.EMAIL = @email";
+                        WHERE nv.EMAIL = @email
+                          AND tk.MNV IS NOT NULL
+                          AND tk.TT <> -1";
 
                     using (SqlCommand cmd =
                         new SqlCommand(sql, conn))
                     {
-                        cmd.Parameters.AddWithValue(
-                            "@otp", otp);
+                        cmd.Parameters.Add(
+                            "@otp", SqlDbType.NVarChar, 50
+                        ).Value = otp;
 
-                        cmd.Parameters.AddWithValue(
-                            "@email", email);
+                        cmd.Parameters.Add(
+                            "@email", SqlDbType.NVarChar, 255
+                        ).Value = email;
 
                         cmd.ExecuteNonQuery();
                     }
@@ -285,13 +279,13 @@ namespace src.DAO
             catch (Exception ex)
             {
                 Console.WriteLine(
-                    "Lỗi SendOTP TaiKhoan: "
-                    + ex.Message);
+                    "Lỗi SendOTP TaiKhoan: " + ex.Message);
+
                 throw;
             }
         }
 
-        // 7. Kiểm tra OTP
+        // 6. Kiểm tra OTP nhân viên
         public bool checkOtp(string email, string otp)
         {
             try
@@ -301,20 +295,24 @@ namespace src.DAO
                 {
                     const string sql = @"
                         SELECT COUNT(1)
-                        FROM TAIKHOAN AS tk
-                        INNER JOIN NHANVIEN AS nv
+                        FROM dbo.TAIKHOAN AS tk
+                        INNER JOIN dbo.NHANVIEN AS nv
                             ON tk.MNV = nv.MNV
                         WHERE nv.EMAIL = @email
-                          AND tk.OTP = @otp";
+                          AND tk.OTP = @otp
+                          AND tk.MNV IS NOT NULL
+                          AND tk.TT <> -1";
 
                     using (SqlCommand cmd =
                         new SqlCommand(sql, conn))
                     {
-                        cmd.Parameters.AddWithValue(
-                            "@email", email);
+                        cmd.Parameters.Add(
+                            "@email", SqlDbType.NVarChar, 255
+                        ).Value = email;
 
-                        cmd.Parameters.AddWithValue(
-                            "@otp", otp);
+                        cmd.Parameters.Add(
+                            "@otp", SqlDbType.NVarChar, 50
+                        ).Value = otp;
 
                         return Convert.ToInt32(
                             cmd.ExecuteScalar()) > 0;
@@ -324,32 +322,35 @@ namespace src.DAO
             catch (Exception ex)
             {
                 Console.WriteLine(
-                    "Lỗi CheckOTP TaiKhoan: "
-                    + ex.Message);
+                    "Lỗi CheckOTP TaiKhoan: " + ex.Message);
+
                 throw;
             }
         }
 
-        // 8. Xóa mềm/khóa tài khoản
+        // 7. Xóa mềm tài khoản theo MaTK
         public int delete(string t)
         {
             try
             {
+                if (!int.TryParse(t, out int maTK) || maTK <= 0)
+                    return 0;
+
                 using (SqlConnection conn =
                     SqlServerHelper.GetConnection())
                 {
                     const string sql = @"
-                        UPDATE TAIKHOAN
+                        UPDATE dbo.TAIKHOAN
                         SET TT = -1
-                        WHERE MNV = @mnv
+                        WHERE MaTK = @maTK
                           AND TT <> -1";
 
                     using (SqlCommand cmd =
                         new SqlCommand(sql, conn))
                     {
                         cmd.Parameters.Add(
-                            "@mnv", SqlDbType.Int
-                        ).Value = int.Parse(t);
+                            "@maTK", SqlDbType.Int
+                        ).Value = maTK;
 
                         return cmd.ExecuteNonQuery();
                     }
@@ -358,14 +359,13 @@ namespace src.DAO
             catch (Exception ex)
             {
                 Console.WriteLine(
-                    "Lỗi Delete TaiKhoan: "
-                    + ex.Message);
+                    "Lỗi Delete TaiKhoan: " + ex.Message);
+
                 return 0;
             }
         }
 
-        // 9. Lấy danh sách tài khoản
-        // Không lấy tài khoản đã xóa mềm TT = -1
+        // 8. Lấy tất cả tài khoản nhân viên và khách hàng Web
         public List<TaiKhoanDTO> selectAll()
         {
             List<TaiKhoanDTO> result =
@@ -375,10 +375,11 @@ namespace src.DAO
                 SqlServerHelper.GetConnection())
             {
                 const string sql = @"
-                    SELECT MNV, TDN, MK, MNQ, TT
-                    FROM TAIKHOAN
+                    SELECT
+                        MaTK, MNV, MKH, TDN, MK, MNQ, TT
+                    FROM dbo.TAIKHOAN
                     WHERE TT IN (0, 1, 2)
-                    ORDER BY MNV";
+                    ORDER BY MaTK";
 
                 using (SqlCommand cmd =
                     new SqlCommand(sql, conn))
@@ -386,30 +387,36 @@ namespace src.DAO
                     cmd.ExecuteReader())
                 {
                     while (rs.Read())
+                    {
                         result.Add(ReadTaiKhoan(rs));
+                    }
                 }
             }
 
             return result;
         }
 
-        // 10. Tìm tài khoản theo mã nhân viên
+        // 9. Tìm tài khoản theo MaTK
         public TaiKhoanDTO selectById(string t)
         {
+            if (!int.TryParse(t, out int maTK))
+                return null;
+
             using (SqlConnection conn =
                 SqlServerHelper.GetConnection())
             {
                 const string sql = @"
-                    SELECT MNV, TDN, MK, MNQ, TT
-                    FROM TAIKHOAN
-                    WHERE MNV = @mnv";
+                    SELECT
+                        MaTK, MNV, MKH, TDN, MK, MNQ, TT
+                    FROM dbo.TAIKHOAN
+                    WHERE MaTK = @maTK";
 
                 using (SqlCommand cmd =
                     new SqlCommand(sql, conn))
                 {
                     cmd.Parameters.Add(
-                        "@mnv", SqlDbType.Int
-                    ).Value = int.Parse(t);
+                        "@maTK", SqlDbType.Int
+                    ).Value = maTK;
 
                     using (SqlDataReader rs =
                         cmd.ExecuteReader())
@@ -423,23 +430,26 @@ namespace src.DAO
             return null;
         }
 
-        // 11. Tìm tài khoản theo tên đăng nhập
-        // Giữ nguyên để TaiKhoanBUS.DangNhap() sử dụng
+        // 10. Tìm tài khoản theo tên đăng nhập Desktop
+        // Không cho tài khoản khách hàng đăng nhập Desktop
         public TaiKhoanDTO selectByUser(string username)
         {
             using (SqlConnection conn =
                 SqlServerHelper.GetConnection())
             {
                 const string sql = @"
-                    SELECT MNV, TDN, MK, MNQ, TT
-                    FROM TAIKHOAN
-                    WHERE TDN = @tdn";
+                    SELECT
+                        MaTK, MNV, MKH, TDN, MK, MNQ, TT
+                    FROM dbo.TAIKHOAN
+                    WHERE TDN = @tdn
+                      AND MNV IS NOT NULL
+                      AND TT <> -1";
 
                 using (SqlCommand cmd =
                     new SqlCommand(sql, conn))
                 {
                     cmd.Parameters.Add(
-                        "@tdn", SqlDbType.NVarChar, 100
+                        "@tdn", SqlDbType.NVarChar, 255
                     ).Value = username;
 
                     using (SqlDataReader rs =
@@ -454,8 +464,7 @@ namespace src.DAO
             return null;
         }
 
-        // 12. TAIKHOAN dùng MNV làm khóa chính/khóa ngoại.
-        // Không có mã tài khoản IDENTITY riêng.
+        // 11. MaTK được SQL Server tự tăng
         public int getAutoIncrement()
         {
             return -1;
