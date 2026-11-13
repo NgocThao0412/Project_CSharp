@@ -34,7 +34,7 @@ public sealed class DatHangApiController(DatHangBUS datHang, ILogger<DatHangApiC
         catch (SqlException ex) when (ex.Number is 208 or 207)
         {
             log.LogError(ex, "Chưa cài bảng DONHANGWEB hoặc cấu trúc SQL không đúng.");
-            return Problem("Thiếu bảng DONHANGWEB. Hãy chạy database/02_WEB_DAT_HANG.sql một lần trên database quanlykho.", statusCode: 503);
+            return Problem("Cấu trúc database chưa đồng bộ các bảng đặt hàng. Vui lòng kiểm tra kết nối SQL Server.", statusCode: 503);
         }
         catch (SqlException ex)
         {

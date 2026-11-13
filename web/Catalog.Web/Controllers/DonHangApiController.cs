@@ -1,8 +1,7 @@
-using Catalog.Web.DAO;
-using Catalog.Web.DTO;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
+using Catalog.Web.DAO;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 
 namespace Catalog.Web.Controllers;
@@ -12,20 +11,38 @@ namespace Catalog.Web.Controllers;
 [Route("api/don-hang")]
 public sealed class DonHangApiController(DonHangDAO donHang, ILogger<DonHangApiController> log) : ControllerBase
 {
-    [HttpPost("tra-cuu")]
-    public async Task<IActionResult> TraCuu([FromBody] TraCuuDonHangDTO thongTin, CancellationToken ct)
+    [HttpGet("cua-toi")]
+    public async Task<IActionResult> CuaToi(CancellationToken ct)
     {
+        if (!int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var maKhach))
+            return Unauthorized(new { message = "Vui lòng đăng nhập để xem đơn hàng." });
         try
         {
-            if (!int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var maKhach))
-                return Unauthorized();
-            var ketQua = await donHang.TraCuuAsync(maKhach, thongTin.MaDon, thongTin.SoDienThoai, ct);
-            return ketQua is null ? NotFound(new { message = "Không tìm thấy đơn hàng phù hợp." }) : Ok(ketQua);
+            return Ok(await donHang.DanhSachAsync(maKhach, ct));
         }
         catch (SqlException ex)
         {
-            log.LogError(ex, "Không tra cứu được đơn hàng.");
-            return Problem("Chưa thể kết nối SQL Server.", statusCode: 503);
+            log.LogError(ex, "Không tải được danh sách đơn hàng.");
+            return Problem("Không thể tải danh sách đơn hàng. Vui lòng thử lại.", statusCode: 503);
+        }
+    }
+
+    [HttpGet("{maDon:int}")]
+    public async Task<IActionResult> ChiTiet(int maDon, CancellationToken ct)
+    {
+        if (!int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var maKhach))
+            return Unauthorized(new { message = "Vui lòng đăng nhập để xem đơn hàng." });
+        if (maDon <= 0) return BadRequest(new { message = "Mã đơn hàng không hợp lệ." });
+        try
+        {
+            var don = await donHang.ChiTietAsync(maKhach, maDon, ct);
+            if (don is null) return NotFound(new { message = "Không tìm thấy đơn hàng trong tài khoản của bạn." });
+            return Ok(don);
+        }
+        catch (SqlException ex)
+        {
+            log.LogError(ex, "Không tải được chi tiết đơn hàng.");
+            return Problem("Không thể tải chi tiết đơn hàng. Vui lòng thử lại.", statusCode: 503);
         }
     }
 }

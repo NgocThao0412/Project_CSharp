@@ -43,8 +43,15 @@ public sealed class DatHangDAO(KetNoi ketNoi, IConfiguration cauHinh)
             }
 
             await using (var kiemTraKhach = Lenh(@"
-                SELECT COUNT(1) FROM dbo.KHACHHANG
-                WHERE MKH = @khach AND TT = 1 AND TENDANGNHAP IS NOT NULL", db, tran))
+                SELECT COUNT(1)
+                FROM dbo.KHACHHANG AS kh
+                WHERE kh.MKH = @khach AND kh.TT = 1
+                  AND EXISTS (
+                      SELECT 1 FROM dbo.TAIKHOAN AS tk
+                      INNER JOIN dbo.NHOMQUYEN AS nq ON nq.MNQ = tk.MNQ
+                      WHERE tk.MKH = kh.MKH AND tk.MNV IS NULL
+                        AND tk.TT = 1 AND nq.TEN = N'Khách hàng' AND nq.TT = 1
+                  )", db, tran))
             {
                 kiemTraKhach.Parameters.Add("@khach", SqlDbType.Int).Value = maKhach;
                 if (Convert.ToInt32(await kiemTraKhach.ExecuteScalarAsync(ct)) == 0)

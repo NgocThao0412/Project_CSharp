@@ -44,8 +44,8 @@ export default function SiteLayout() {
     if (location.pathname === '/gio-hang' || location.pathname.startsWith('/dat-hang')) {
       setLoginModal('gio-hang');
       navigate('/', { replace: true });
-    } else if (location.pathname === '/don-hang/tra-cuu') {
-      setLoginModal('tra-cuu');
+    } else if (location.pathname.startsWith('/tai-khoan/don-hang')) {
+      setLoginModal('don-hang');
       navigate('/', { replace: true });
     }
   }, [taiKhoan, daDangNhap, location.pathname, navigate]);
@@ -71,8 +71,8 @@ export default function SiteLayout() {
     const title = location.pathname.startsWith('/san-pham/') ? 'Chi tiết sản phẩm'
       : isCatalog ? 'Sản phẩm' : location.pathname === '/gio-hang' ? 'Giỏ hàng'
       : location.pathname.startsWith('/dat-hang') ? 'Đặt hàng'
-      : location.pathname.startsWith('/tai-khoan/') ? 'Tài khoản'
-      : location.pathname.startsWith('/don-hang/') ? 'Tra cứu đơn hàng' : 'Trang chủ';
+      : location.pathname.startsWith('/tai-khoan/don-hang') ? 'Đơn hàng của tôi'
+      : location.pathname.startsWith('/tai-khoan/') ? 'Tài khoản' : 'Trang chủ';
     document.title = `${title} - Cửa hàng linh kiện máy tính`;
   }, [location.pathname, isCatalog]);
 
@@ -119,8 +119,6 @@ export default function SiteLayout() {
             <button type="submit" aria-label="Tìm kiếm"><ShopIcon name="search" size={22} /></button>
           </form>
           <span className="shop-header-separator" />
-          <Link to="/don-hang/tra-cuu" className="shop-order-link"
-            onClick={e => { if (!daDangNhap) { e.preventDefault(); yeuCauDangNhap('tra-cuu'); } }}>Tra cứu đơn</Link>
           <Link to="/gio-hang" className="shop-action-icon" title="Giỏ hàng" aria-label="Giỏ hàng"
             onClick={e => { if (!daDangNhap) { e.preventDefault(); yeuCauDangNhap('gio-hang'); } }}>
             <ShopIcon name="cart" size={26} />
@@ -134,8 +132,8 @@ export default function SiteLayout() {
             <button className="shop-action-icon shop-logout-icon" type="button" onClick={dangXuat}
               aria-label="Đăng xuất" title="Đăng xuất"><ShopIcon name="logout" size={24} /></button>
           </> : <>
-            <span className="shop-action-icon" title="Tài khoản" aria-label="Tài khoản"><ShopIcon name="user" size={26} /></span>
             <Link to="/tai-khoan/dang-nhap" className="shop-login-button">Đăng nhập</Link>
+            <Link to="/tai-khoan/dang-ky" className="shop-login-button shop-register-button">Đăng ký</Link>
           </>}
         </div>
       </div>
@@ -145,8 +143,8 @@ export default function SiteLayout() {
     {loginModal && <div className="web-login-overlay">
       <section className="web-login-dialog" role="dialog" aria-modal="true" aria-labelledby="web-login-title">
         <button type="button" className="web-login-close" aria-label="Đóng" onClick={() => setLoginModal('')}>×</button>
-        <div className="web-login-icon"><ShopIcon name={loginModal === 'tra-cuu' ? 'newspaper' : 'cart'} size={30} /></div>
-        <h2 id="web-login-title">Đăng nhập để sử dụng chức năng {loginModal === 'tra-cuu' ? 'tra cứu đơn' : 'giỏ hàng'}</h2>
+        <div className="web-login-icon"><ShopIcon name={loginModal === 'don-hang' ? 'newspaper' : 'cart'} size={30} /></div>
+        <h2 id="web-login-title">Đăng nhập để sử dụng chức năng {loginModal === 'don-hang' ? 'xem đơn hàng' : 'giỏ hàng'}</h2>
         <div className="web-login-actions">
           <Link className="web-secondary" to="/tai-khoan/dang-ky" onClick={() => setLoginModal('')}>Đăng ký</Link>
           <Link className="web-primary" to="/tai-khoan/dang-nhap" onClick={() => setLoginModal('')}>Đăng nhập</Link>

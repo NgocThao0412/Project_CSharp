@@ -112,11 +112,25 @@ public sealed class TaiKhoanApiController(TaiKhoanBUS taiKhoan, TaiKhoanDAO dao,
         try
         {
             if (!await dao.CapNhatAsync(maKhach, thongTin, ct)) return NotFound(new { message = "Tài khoản không còn hoạt động." });
-            return Ok(await dao.LayThongTinAsync(maKhach, ct));
+            var daCapNhat = await dao.LayThongTinAsync(maKhach, ct);
+            if (daCapNhat is null) return NotFound(new { message = "Tài khoản không còn hoạt động." });
+            var claims = new[]
+            {
+                new Claim(ClaimTypes.NameIdentifier, maKhach.ToString()),
+                new Claim(ClaimTypes.Name, daCapNhat.TenDangNhap),
+                new Claim("HoTen", daCapNhat.HoTen)
+            };
+            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
+                new ClaimsPrincipal(new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme)));
+            return Ok(daCapNhat);
+        }
+        catch (LoiDangKyException ex)
+        {
+            return Conflict(new { message = ex.Message });
         }
         catch (SqlException ex) when (ex.Number is 2601 or 2627)
         {
-            return Conflict(new { message = "Email hoặc số điện thoại đã được sử dụng." });
+            return Conflict(new { message = "Tên đăng nhập, email hoặc số điện thoại đã được sử dụng." });
         }
         catch (SqlException ex)
         {

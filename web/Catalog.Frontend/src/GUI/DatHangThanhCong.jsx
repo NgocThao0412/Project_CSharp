@@ -16,15 +16,15 @@ export default function DatHangThanhCong() {
           <div><span>Trạng thái</span><strong>{don.trangThai}</strong></div>
           <div><span>Thanh toán</span><strong>{don.hinhThucThanhToan}</strong></div>
         </div>
-        <p className="muted">Hãy lưu mã đơn và sử dụng số điện thoại đã nhập để tra cứu trạng thái.</p>
+        <p className="muted">Bạn có thể theo dõi trạng thái và xem chi tiết trong mục Đơn hàng của tôi.</p>
         <div className="web-success-actions">
-          <Link className="web-primary" to="/don-hang/tra-cuu">Tra cứu đơn hàng</Link>
+          <Link className="web-primary" to="/tai-khoan/don-hang">Đơn hàng của tôi</Link>
           <Link className="web-secondary" to="/san-pham">Tiếp tục mua sắm</Link>
         </div>
       </> : <>
         <h1>Không có thông tin xác nhận</h1>
-        <p>Nếu bạn vừa đặt hàng, hãy dùng mã đơn và số điện thoại để tra cứu.</p>
-        <Link className="web-primary" to="/don-hang/tra-cuu">Tra cứu đơn hàng</Link>
+        <p>Nếu bạn vừa đặt hàng, hãy xem lại danh sách đơn hàng của mình.</p>
+        <Link className="web-primary" to="/tai-khoan/don-hang">Đơn hàng của tôi</Link>
       </>}
     </section>
   </div>;

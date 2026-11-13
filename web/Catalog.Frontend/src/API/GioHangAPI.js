@@ -25,8 +25,8 @@ export const capNhatGioHang = (productId, quantity) =>
   goi('/api/gio-hang/cap-nhat', 'POST', { productId, quantity });
 export const xoaGioHang = productId =>
   goi('/api/gio-hang/xoa', 'POST', { productId });
-export const traCuuDonHang = (maDon, soDienThoai) =>
-  goi('/api/don-hang/tra-cuu', 'POST', { maDon: Number(maDon), soDienThoai });
+export const layDanhSachDonHang = () => goi('/api/don-hang/cua-toi');
+export const layChiTietDonHang = maDon => goi(`/api/don-hang/${encodeURIComponent(maDon)}`);
 
 // Yeu cau gui chi thong tin nguoi nhan. San pham/gia lay tu Session va SQL o C#.
 export const datHang = thongTin => goi('/api/don-hang/dat', 'POST', thongTin);

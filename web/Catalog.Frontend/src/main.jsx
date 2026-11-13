@@ -10,7 +10,7 @@ import GioHang from './GUI/GioHang.jsx';
 import DatHang from './GUI/DatHang.jsx';
 import DatHangThanhCong from './GUI/DatHangThanhCong.jsx';
 import TaiKhoan from './GUI/TaiKhoan.jsx';
-import TraCuuDonHang from './GUI/TraCuuDonHang.jsx';
+import DonHangCuaToi from './GUI/DonHangCuaToi.jsx';
 import './site.css';
 
 createRoot(document.getElementById('root')).render(
@@ -28,7 +28,8 @@ createRoot(document.getElementById('root')).render(
           <Route path="tai-khoan/dang-nhap" element={<TaiKhoan />} />
           <Route path="tai-khoan/dang-ky" element={<TaiKhoan />} />
           <Route path="tai-khoan/thong-tin" element={<TaiKhoan />} />
-          <Route path="don-hang/tra-cuu" element={<TraCuuDonHang />} />
+          <Route path="tai-khoan/don-hang" element={<DonHangCuaToi />} />
+          <Route path="tai-khoan/don-hang/:maDon" element={<DonHangCuaToi />} />
           <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Routes>

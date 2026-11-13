@@ -20,11 +20,16 @@ public sealed class DatHangBUS(GioHangBUS gioHang, DatHangDAO donHang)
         yeuCau.Email = string.IsNullOrWhiteSpace(yeuCau.Email) ? null : yeuCau.Email.Trim();
         yeuCau.GhiChu = string.IsNullOrWhiteSpace(yeuCau.GhiChu) ? null : yeuCau.GhiChu.Trim();
 
-        if (yeuCau.HoTen.Length is < 2 or > 100 || yeuCau.DiaChi.Length is < 10 or > 255 ||
-            yeuCau.SoDienThoai.Length != 10 || yeuCau.SoDienThoai[0] != '0' ||
-            !yeuCau.SoDienThoai.All(char.IsAsciiDigit) ||
-            (yeuCau.GhiChu?.Length ?? 0) > 500)
-            throw new LoiDatHangException("Thông tin người nhận không hợp lệ.");
+        if (yeuCau.HoTen.Length is < 2 or > 100 ||
+            !System.Text.RegularExpressions.Regex.IsMatch(yeuCau.HoTen, @"^[\p{L}]+(?: +[\p{L}]+)*$"))
+            throw new LoiDatHangException("Họ tên người nhận chỉ được chứa chữ cái và khoảng trắng, không chứa ký tự đặc biệt.");
+        if (yeuCau.SoDienThoai.Length != 10 || yeuCau.SoDienThoai[0] != '0' ||
+            !yeuCau.SoDienThoai.All(char.IsAsciiDigit))
+            throw new LoiDatHangException("Số điện thoại người nhận phải đủ 10 chữ số và bắt đầu bằng 0.");
+        if (yeuCau.DiaChi.Length is < 10 or > 255)
+            throw new LoiDatHangException("Vui lòng nhập địa chỉ giao hàng đầy đủ, từ 10 đến 255 ký tự.");
+        if ((yeuCau.GhiChu?.Length ?? 0) > 500)
+            throw new LoiDatHangException("Ghi chú không được vượt quá 500 ký tự.");
 
         var ds = gioHang.LayMucDaChon(yeuCau.MuaNgay);
         if (ds.Count == 0) throw new LoiDatHangException("Giỏ hàng đang trống.");
