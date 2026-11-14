@@ -7,6 +7,7 @@ using Microsoft.Data.SqlClient;
 namespace Catalog.Web.Controllers;
 
 [ApiController]
+[ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
 [Authorize]
 [Route("api/gio-hang")]
 public sealed class GioHangApiController(GioHangBUS gioHang, ILogger<GioHangApiController> log) : ControllerBase

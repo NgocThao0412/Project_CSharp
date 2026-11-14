@@ -1,21 +1,24 @@
+using System.Security.Claims;
 using System.Text.Json;
 using Catalog.Web.DAO;
 using Catalog.Web.DTO;
 
 namespace Catalog.Web.BUS;
 
-public sealed class GioHangBUS(IHttpContextAccessor truyCap, ISanPhamDAO sanPham)
+public sealed class GioHangBUS(IHttpContextAccessor truyCap, ISanPhamDAO sanPham, GioHangDAO gioHangDao)
 {
-    private const string Khoa = "GioHangWeb";
     private const string KhoaMuaNgay = "MuaNgayWeb";
     private ISession Phien => truyCap.HttpContext?.Session
         ?? throw new InvalidOperationException("Chưa bật Session trong Program.cs.");
 
-    private List<MucGioHangDTO> Doc(string khoa = Khoa)
+    private int MaKhach => int.TryParse(truyCap.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier), out var ma)
+        && ma > 0 ? ma : throw new UnauthorizedAccessException("Vui lòng đăng nhập để sử dụng giỏ hàng.");
+
+    private List<MucGioHangDTO> DocMuaNgay()
     {
         try
         {
-            var json = Phien.GetString(khoa);
+            var json = Phien.GetString(KhoaMuaNgay);
             if (string.IsNullOrWhiteSpace(json)) return new();
             return (JsonSerializer.Deserialize<List<MucGioHangDTO>>(json) ?? new())
                 .Where(x => x.MaSanPham > 0 && x.SoLuong is > 0 and <= 99)
@@ -29,11 +32,10 @@ public sealed class GioHangBUS(IHttpContextAccessor truyCap, ISanPhamDAO sanPham
         }
     }
 
-    private void Luu(List<MucGioHangDTO> gio) => Phien.SetString(Khoa, JsonSerializer.Serialize(gio));
+    public async Task<IReadOnlyList<MucGioHangDTO>> LayMucDaChonAsync(int maKhach, bool muaNgay = false, CancellationToken ct = default)
+        => muaNgay ? DocMuaNgay() : await gioHangDao.LayAsync(maKhach, ct);
 
-    // Session la nguon du lieu gio hang duoc may chu tin cay khi tao don.
-    public IReadOnlyList<MucGioHangDTO> LayMucDaChon(bool muaNgay = false) => Doc(muaNgay ? KhoaMuaNgay : Khoa);
-    public void XoaSauDatHang(bool muaNgay = false) => Phien.Remove(muaNgay ? KhoaMuaNgay : Khoa);
+    public void XoaMuaNgaySauDatHang() => Phien.Remove(KhoaMuaNgay);
 
     public async Task<string?> ChonMuaNgayAsync(int ma, CancellationToken ct = default)
     {
@@ -50,40 +52,25 @@ public sealed class GioHangBUS(IHttpContextAccessor truyCap, ISanPhamDAO sanPham
         if (ma <= 0 || soLuong is < 1 or > 99) return "Số lượng không hợp lệ.";
         var sp = await sanPham.LayTheoMaAsync(ma, ct);
         if (sp is null) return "Sản phẩm không tồn tại.";
-        var gio = Doc();
-        var cu = gio.FirstOrDefault(x => x.MaSanPham == ma)?.SoLuong ?? 0;
-        if (cu + soLuong > sp.Ton || cu + soLuong > 99) return "Số lượng vượt quá tồn kho.";
-        if (cu == 0)
-        {
-            if (gio.Count >= 30) return "Giỏ hàng tối đa 30 sản phẩm khác nhau.";
-            gio.Add(new MucGioHangDTO(ma, soLuong));
-        }
-        else gio[gio.FindIndex(x => x.MaSanPham == ma)] = new MucGioHangDTO(ma, cu + soLuong);
-        Luu(gio);
-        return null;
+        return await gioHangDao.ThemAsync(MaKhach, ma, soLuong, sp.Ton, ct);
     }
 
     public async Task<string?> CapNhatAsync(int ma, int soLuong, CancellationToken ct = default)
     {
         if (ma <= 0 || soLuong is < 0 or > 99) return "Số lượng không hợp lệ.";
-        var gio = Doc();
-        var viTri = gio.FindIndex(x => x.MaSanPham == ma);
-        if (soLuong == 0)
+        if (soLuong > 0)
         {
-            if (viTri >= 0) gio.RemoveAt(viTri);
-            Luu(gio);
-            return null;
+            var sp = await sanPham.LayTheoMaAsync(ma, ct);
+            if (sp is null || sp.Ton < soLuong) return "Không đủ tồn kho.";
         }
-        if (viTri < 0) return "Không tìm thấy sản phẩm trong giỏ.";
-        var sp = await sanPham.LayTheoMaAsync(ma, ct);
-        if (sp is null || sp.Ton < soLuong) return "Không đủ tồn kho.";
-        gio[viTri] = new MucGioHangDTO(ma, soLuong);
-        Luu(gio);
-        return null;
+        return await gioHangDao.CapNhatAsync(MaKhach, ma, soLuong, ct);
     }
 
-    public Task<TrangGioHangDTO> LayTrangAsync(CancellationToken ct = default) => TaoTrangAsync(Doc(), ct);
-    public Task<TrangGioHangDTO> LayMuaNgayAsync(CancellationToken ct = default) => TaoTrangAsync(Doc(KhoaMuaNgay), ct);
+    public async Task<TrangGioHangDTO> LayTrangAsync(CancellationToken ct = default)
+        => await TaoTrangAsync(await gioHangDao.LayAsync(MaKhach, ct), ct);
+
+    public Task<TrangGioHangDTO> LayMuaNgayAsync(CancellationToken ct = default)
+        => TaoTrangAsync(DocMuaNgay(), ct);
 
     private async Task<TrangGioHangDTO> TaoTrangAsync(IEnumerable<MucGioHangDTO> danhSach, CancellationToken ct)
     {

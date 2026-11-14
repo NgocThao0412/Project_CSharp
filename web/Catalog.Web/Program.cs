@@ -47,6 +47,7 @@ builder.Services.AddScoped<KetNoi>();
 builder.Services.AddScoped<ISanPhamDAO, SanPhamSqlDAO>();
 builder.Services.AddScoped<DonHangDAO>();
 builder.Services.AddScoped<DatHangDAO>();
+builder.Services.AddScoped<GioHangDAO>();
 builder.Services.AddScoped<GioHangBUS>();
 builder.Services.AddScoped<DatHangBUS>();
 builder.Services.AddScoped<SanPhamBUS>();

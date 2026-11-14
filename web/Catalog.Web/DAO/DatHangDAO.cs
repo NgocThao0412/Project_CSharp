@@ -137,6 +137,13 @@ public sealed class DatHangDAO(KetNoi ketNoi, IConfiguration cauHinh)
                 await giao.ExecuteNonQueryAsync(ct);
             }
 
+            if (!yeuCau.MuaNgay)
+            {
+                await using var xoaGio = Lenh("DELETE FROM dbo.GIOHANGWEB WHERE MKH = @khach", db, tran);
+                xoaGio.Parameters.Add("@khach", SqlDbType.Int).Value = maKhach;
+                await xoaGio.ExecuteNonQueryAsync(ct);
+            }
+
             await tran.CommitAsync(ct);
             return new KetQuaDatHangDTO(maDon, tongTien, DateTime.Now,
                 "Chờ duyệt", "Thanh toán khi nhận hàng (COD)");

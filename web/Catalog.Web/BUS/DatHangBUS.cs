@@ -31,14 +31,13 @@ public sealed class DatHangBUS(GioHangBUS gioHang, DatHangDAO donHang)
         if ((yeuCau.GhiChu?.Length ?? 0) > 500)
             throw new LoiDatHangException("Ghi chú không được vượt quá 500 ký tự.");
 
-        var ds = gioHang.LayMucDaChon(yeuCau.MuaNgay);
+        var ds = await gioHang.LayMucDaChonAsync(maKhach, yeuCau.MuaNgay, ct);
         if (ds.Count == 0) throw new LoiDatHangException("Giỏ hàng đang trống.");
         if (ds.Count > 30 || ds.Any(x => x.MaSanPham <= 0 || x.SoLuong is < 1 or > 99))
             throw new LoiDatHangException("Giỏ hàng có số lượng không hợp lệ.");
 
-        // Khong tin gia/ton kho tu frontend, ma san pham duoc lay tu Session cua may chu.
         var ketQua = await donHang.TaoDonAsync(yeuCau, ds, maKhach, ct);
-        gioHang.XoaSauDatHang(yeuCau.MuaNgay);
+        if (yeuCau.MuaNgay) gioHang.XoaMuaNgaySauDatHang();
         return ketQua;
     }
 }
