@@ -124,9 +124,9 @@ export default function DatHang() {
         <h2>Thông tin người nhận</h2>
         <div className="web-delivery-options" role="group" aria-label="Chọn người nhận hàng">
           <button type="button" className={`web-delivery-choice ${cheDoGiao === 'toi' ? 'active' : ''}`}
-            aria-pressed={cheDoGiao === 'toi'} onClick={() => chonNguoiNhan('toi')} disabled={dangGui}>Giao cho tôi</button>
+            aria-pressed={cheDoGiao === 'toi'} onClick={() => chonNguoiNhan('toi')} disabled={dangGui}>Sử dụng thông tin đã lưu</button>
           <button type="button" className={`web-delivery-choice ${cheDoGiao === 'khac' ? 'active' : ''}`}
-            aria-pressed={cheDoGiao === 'khac'} onClick={() => chonNguoiNhan('khac')} disabled={dangGui}>Giao cho người khác</button>
+            aria-pressed={cheDoGiao === 'khac'} onClick={() => chonNguoiNhan('khac')} disabled={dangGui}>Nhập thông tin giao hàng mới</button>
         </div>
         {cheDoGiao === 'toi' && loiThongTin && <div className="web-error" role="alert">{loiThongTin}. Bạn vẫn có thể tự nhập thông tin giao hàng.</div>}
         <div className="web-checkout-fields">
