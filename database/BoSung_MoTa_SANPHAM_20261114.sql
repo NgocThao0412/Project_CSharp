@@ -1,8 +1,8 @@
 SET NOCOUNT ON;
 SET XACT_ABORT ON;
 
-IF DB_NAME() <> N'quanlykho_nhom'
-    THROW 51001, N'Chi chay script nay trong database quanlykho_nhom.', 1;
+IF DB_NAME() <> N'quanlykho'
+    THROW 51001, N'Chi chay script nay trong database quanlykho.', 1;
 
 IF OBJECT_ID(N'dbo.SANPHAM', N'U') IS NULL
     THROW 51002, N'Khong tim thay bang dbo.SANPHAM.', 1;
