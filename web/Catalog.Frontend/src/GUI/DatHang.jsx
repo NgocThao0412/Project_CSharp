@@ -174,7 +174,6 @@ export default function DatHang() {
         <button className="web-primary web-checkout-submit" type="submit"
           disabled={dangGui || !gio.available}>{dangGui ? 'Đang xác nhận...' : 'Xác nhận đặt hàng'}</button>
         <Link className="web-secondary" to={muaNgay ? '/san-pham' : '/gio-hang'}>{muaNgay ? 'Tiếp tục xem sản phẩm' : 'Quay lại giỏ hàng'}</Link>
-        <p className="muted web-checkout-footnote">Giá và tồn kho được kiểm tra lại ở C# và SQL Server trước khi ghi đơn.</p>
       </aside>
     </form>}
   </div>;
