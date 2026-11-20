@@ -10,6 +10,11 @@
 # Local configuration and secrets
 appsettings.Development.json
 .env
-.env.***/bin/
-**/obj/
-**/.vs/
+.env.*
+
+# React / Vite
+**/node_modules/
+**/dist/
+
+# Temporary files
+*.log

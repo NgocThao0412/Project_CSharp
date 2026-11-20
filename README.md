@@ -23,6 +23,7 @@
 ## Hướng dẫn cài đặt và chạy ứng dụng
 
 - **Tải ứng dụng:** Clone hoặc tải ZIP dự án từ GitHub.
+- **Cài đặt môi trường:** .NET SDK 10 và Node.js
 - **Cơ sở dữ liệu:** Cài đặt SQL Server, mở SSMS và chạy file `database/quanlykho.sql` để tạo cơ sở dữ liệu `quanlykho` gồm 18 bảng.
 - **Kết nối:** Kiểm tra và điều chỉnh chuỗi kết nối SQL Server trong `src/config` (Desktop) và `web/Catalog.Web/appsettings.json` (Backend) nếu cần.
 
@@ -46,7 +47,7 @@ npm.cmd run dev
 ```
 
 - Truy cập Website tại: **http://localhost:5173**
-- Lưu ý: Cần khởi động SQL Server và Backend trước khi sử dụng Web.
+- Lưu ý: Cần khởi động SQL Server và Backend trước khi sử dụng Web, FE vs BE sử dụng hai Terminal khác nhau.
 
 ### Tài khoản đăng nhập demo
 + Quản lý kho hàng: QL1 123456
