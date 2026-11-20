@@ -1,83 +1,107 @@
-using System.Data;
-using Catalog.Web.config;
+
+using System.Text.Json;
 using Catalog.Web.DTO;
-using Microsoft.Data.SqlClient;
 
 namespace Catalog.Web.DAO;
 
-public sealed class GioHangDAO(KetNoi ketNoi)
+// Gio hang luu tam trong Session.
+// Khong can bang GIOHANGWEB trong SQL Server.
+public sealed class GioHangDAO(IHttpContextAccessor truyCap)
 {
-    public async Task<IReadOnlyList<MucGioHangDTO>> LayAsync(int maKhach, CancellationToken ct = default)
-    {
-        await using var db = await ketNoi.MoAsync(ct);
-        await using var lenh = new SqlCommand(@"
-            SELECT MSP, SL
-            FROM dbo.GIOHANGWEB
-            WHERE MKH = @khach
-            ORDER BY MSP", db);
-        lenh.Parameters.Add("@khach", SqlDbType.Int).Value = maKhach;
+    private ISession Phien =>
+        truyCap.HttpContext?.Session
+        ?? throw new InvalidOperationException("Session chua duoc bat.");
 
-        var danhSach = new List<MucGioHangDTO>();
-        await using var doc = await lenh.ExecuteReaderAsync(ct);
-        while (await doc.ReadAsync(ct))
-            danhSach.Add(new MucGioHangDTO(doc.GetInt32(0), doc.GetInt32(1)));
-        return danhSach;
-    }
+    private static string Khoa(int maKhach) => $"GioHangWeb_{maKhach}";
 
-    public async Task<string?> ThemAsync(int maKhach, int maSanPham, int soLuong, int tonKho, CancellationToken ct = default)
+    private List<MucGioHangDTO> Doc(int maKhach)
     {
-        await using var db = await ketNoi.MoAsync(ct);
-        await using var giaoDich = (SqlTransaction)await db.BeginTransactionAsync(IsolationLevel.Serializable, ct);
+        var json = Phien.GetString(Khoa(maKhach));
+
+        if (string.IsNullOrWhiteSpace(json))
+            return new List<MucGioHangDTO>();
+
         try
         {
-            await using var tim = new SqlCommand(@"
-                SELECT SL FROM dbo.GIOHANGWEB WITH (UPDLOCK, HOLDLOCK)
-                WHERE MKH = @khach AND MSP = @sanPham", db, giaoDich);
-            tim.Parameters.Add("@khach", SqlDbType.Int).Value = maKhach;
-            tim.Parameters.Add("@sanPham", SqlDbType.Int).Value = maSanPham;
-            var giaTri = await tim.ExecuteScalarAsync(ct);
-            var hienCo = giaTri is null or DBNull ? 0 : Convert.ToInt32(giaTri);
-
-            if (hienCo + soLuong > 99 || hienCo + soLuong > tonKho)
-                return "Số lượng vượt quá tồn kho.";
-
-            if (hienCo == 0)
-            {
-                await using var dem = new SqlCommand(@"
-                    SELECT COUNT(*) FROM dbo.GIOHANGWEB WITH (UPDLOCK, HOLDLOCK)
-                    WHERE MKH = @khach", db, giaoDich);
-                dem.Parameters.Add("@khach", SqlDbType.Int).Value = maKhach;
-                if (Convert.ToInt32(await dem.ExecuteScalarAsync(ct)) >= 30)
-                    return "Giỏ hàng tối đa 30 sản phẩm khác nhau.";
-            }
-
-            await using var luu = new SqlCommand(hienCo == 0
-                ? "INSERT INTO dbo.GIOHANGWEB (MKH, MSP, SL) VALUES (@khach, @sanPham, @soLuong)"
-                : "UPDATE dbo.GIOHANGWEB SET SL = @soLuong WHERE MKH = @khach AND MSP = @sanPham", db, giaoDich);
-            luu.Parameters.Add("@khach", SqlDbType.Int).Value = maKhach;
-            luu.Parameters.Add("@sanPham", SqlDbType.Int).Value = maSanPham;
-            luu.Parameters.Add("@soLuong", SqlDbType.Int).Value = hienCo + soLuong;
-            await luu.ExecuteNonQueryAsync(ct);
-            await giaoDich.CommitAsync(ct);
-            return null;
+            return JsonSerializer.Deserialize<List<MucGioHangDTO>>(json)
+                ?? new List<MucGioHangDTO>();
         }
-        catch
+        catch (JsonException)
         {
-            try { await giaoDich.RollbackAsync(CancellationToken.None); } catch { }
-            throw;
+            return new List<MucGioHangDTO>();
         }
     }
 
-    public async Task<string?> CapNhatAsync(int maKhach, int maSanPham, int soLuong, CancellationToken ct = default)
+    private void Luu(int maKhach, List<MucGioHangDTO> ds)
     {
-        await using var db = await ketNoi.MoAsync(ct);
-        await using var lenh = new SqlCommand(soLuong == 0
-            ? "DELETE FROM dbo.GIOHANGWEB WHERE MKH = @khach AND MSP = @sanPham"
-            : "UPDATE dbo.GIOHANGWEB SET SL = @soLuong WHERE MKH = @khach AND MSP = @sanPham", db);
-        lenh.Parameters.Add("@khach", SqlDbType.Int).Value = maKhach;
-        lenh.Parameters.Add("@sanPham", SqlDbType.Int).Value = maSanPham;
-        lenh.Parameters.Add("@soLuong", SqlDbType.Int).Value = soLuong;
-        var soDong = await lenh.ExecuteNonQueryAsync(ct);
-        return soLuong > 0 && soDong == 0 ? "Không tìm thấy sản phẩm trong giỏ." : null;
+        Phien.SetString(Khoa(maKhach), JsonSerializer.Serialize(ds));
+    }
+
+    public Task<IReadOnlyList<MucGioHangDTO>> LayAsync(
+        int maKhach, CancellationToken ct = default)
+    {
+        IReadOnlyList<MucGioHangDTO> ds = Doc(maKhach);
+        return Task.FromResult(ds);
+    }
+
+    public Task<string?> ThemAsync(
+        int maKhach, int maSanPham,
+        int soLuong, int tonKho,
+        CancellationToken ct = default)
+    {
+        var ds = Doc(maKhach);
+        var sp = ds.FirstOrDefault(x => x.MaSanPham == maSanPham);
+
+        int hienCo = sp?.SoLuong ?? 0;
+        int tong = hienCo + soLuong;
+
+        if (tong > 99 || tong > tonKho)
+            return Task.FromResult<string?>("Số lượng vượt quá tồn kho.");
+
+        if (sp is null)
+        {
+            if (ds.Count >= 30)
+                return Task.FromResult<string?>(
+                    "Giỏ hàng tối đa 30 sản phẩm khác nhau.");
+
+            ds.Add(new MucGioHangDTO(maSanPham, soLuong));
+        }
+        else
+        {
+            int viTri = ds.FindIndex(x => x.MaSanPham == maSanPham);
+            ds[viTri] = new MucGioHangDTO(maSanPham, tong);
+        }
+
+        Luu(maKhach, ds);
+        return Task.FromResult<string?>(null);
+    }
+
+    public Task<string?> CapNhatAsync(
+        int maKhach, int maSanPham,
+        int soLuong, CancellationToken ct = default)
+    {
+        var ds = Doc(maKhach);
+        int viTri = ds.FindIndex(x => x.MaSanPham == maSanPham);
+
+        if (soLuong == 0)
+        {
+            ds.RemoveAll(x => x.MaSanPham == maSanPham);
+        }
+        else
+        {
+            if (viTri < 0)
+                return Task.FromResult<string?>(
+                    "Không tìm thấy sản phẩm trong giỏ.");
+
+            ds[viTri] = new MucGioHangDTO(maSanPham, soLuong);
+        }
+
+        Luu(maKhach, ds);
+        return Task.FromResult<string?>(null);
+    }
+
+    public void XoaSauDatHang(int maKhach)
+    {
+        Phien.Remove(Khoa(maKhach));
     }
 }

@@ -37,7 +37,16 @@ public sealed class DatHangBUS(GioHangBUS gioHang, DatHangDAO donHang)
             throw new LoiDatHangException("Giỏ hàng có số lượng không hợp lệ.");
 
         var ketQua = await donHang.TaoDonAsync(yeuCau, ds, maKhach, ct);
-        if (yeuCau.MuaNgay) gioHang.XoaMuaNgaySauDatHang();
+
+        if (yeuCau.MuaNgay)
+        {
+            gioHang.XoaMuaNgaySauDatHang();
+        }
+        else
+        {
+            gioHang.XoaGioHangSauDatHang(maKhach);
+        }
+
         return ketQua;
     }
 }

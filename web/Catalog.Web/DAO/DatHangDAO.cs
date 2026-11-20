@@ -123,6 +123,7 @@ public sealed class DatHangDAO(KetNoi ketNoi, IConfiguration cauHinh)
                 await ctPhieu.ExecuteNonQueryAsync(ct);
             }
 
+
             await using (var giao = Lenh(@"
                 INSERT INTO dbo.DONHANGWEB
                 (MPX, MAYEUCAU, HOTENNHAN, SDTNHAN, DIACHINHAN, GHICHU, PHUONGTHUCTT)
@@ -133,26 +134,37 @@ public sealed class DatHangDAO(KetNoi ketNoi, IConfiguration cauHinh)
                 giao.Parameters.Add("@ten", SqlDbType.NVarChar, 100).Value = yeuCau.HoTen;
                 giao.Parameters.Add("@sdt", SqlDbType.NVarChar, 11).Value = yeuCau.SoDienThoai;
                 giao.Parameters.Add("@diaChi", SqlDbType.NVarChar, 255).Value = yeuCau.DiaChi;
-                giao.Parameters.Add("@ghiChu", SqlDbType.NVarChar, 500).Value = (object?)yeuCau.GhiChu ?? DBNull.Value;
+                giao.Parameters.Add("@ghiChu", SqlDbType.NVarChar, 500).Value =
+                    (object?)yeuCau.GhiChu ?? DBNull.Value;
+
                 await giao.ExecuteNonQueryAsync(ct);
             }
 
-            if (!yeuCau.MuaNgay)
-            {
-                await using var xoaGio = Lenh("DELETE FROM dbo.GIOHANGWEB WHERE MKH = @khach", db, tran);
-                xoaGio.Parameters.Add("@khach", SqlDbType.Int).Value = maKhach;
-                await xoaGio.ExecuteNonQueryAsync(ct);
-            }
-
+            // Gio hang duoc luu trong Session, khong xoa bang SQL.
             await tran.CommitAsync(ct);
-            return new KetQuaDatHangDTO(maDon, tongTien, DateTime.Now,
-                "Chờ duyệt", "Thanh toán khi nhận hàng (COD)");
+
+            return new KetQuaDatHangDTO(
+                maDon,
+                tongTien,
+                DateTime.Now,
+                "Chờ duyệt",
+                "Thanh toán khi nhận hàng (COD)"
+            );
         }
         catch
         {
-            try { await tran.RollbackAsync(CancellationToken.None); } catch { /* Giữ lỗi gốc. */ }
+            try
+            {
+                await tran.RollbackAsync(CancellationToken.None);
+            }
+            catch
+            {
+                // Bo qua loi rollback de giu loi ban dau.
+            }
+
             throw;
         }
     }
-
 }
+
+

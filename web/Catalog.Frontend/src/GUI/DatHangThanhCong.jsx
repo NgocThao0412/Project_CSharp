@@ -9,7 +9,6 @@ export default function DatHangThanhCong() {
       {don?.maDon ? <>
         <div className="web-success-mark" aria-hidden="true">✓</div>
         <h1>Đặt hàng thành công!</h1>
-        <p>Đơn hàng đã được ghi vào SQL Server và đang chờ nhân viên duyệt.</p>
         <div className="web-success-order">
           <div><span>Mã đơn hàng</span><strong>#{don.maDon}</strong></div>
           <div><span>Tổng tiền</span><strong>{money(don.tongTien)}</strong></div>

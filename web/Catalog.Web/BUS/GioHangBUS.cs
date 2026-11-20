@@ -37,6 +37,9 @@ public sealed class GioHangBUS(IHttpContextAccessor truyCap, ISanPhamDAO sanPham
 
     public void XoaMuaNgaySauDatHang() => Phien.Remove(KhoaMuaNgay);
 
+    public void XoaGioHangSauDatHang(int maKhach)
+    => gioHangDao.XoaSauDatHang(maKhach);
+
     public async Task<string?> ChonMuaNgayAsync(int ma, CancellationToken ct = default)
     {
         if (ma <= 0) return "Sản phẩm không hợp lệ.";

@@ -60,7 +60,7 @@ export default function SiteLayout() {
     let active = true;
     function refresh() {
       layGioHang().then(gio => {
-        if (active) setCartCount((gio.items ?? []).reduce((sum, item) => sum + item.quantity, 0));
+       if (active) setCartCount((gio.items ?? []).length);
       }).catch(() => { /* Trang chu van su dung duoc neu API dang tam loi. */ });
     }
     refresh();
