@@ -17,6 +17,7 @@
 - **[Cơ sở dữ liệu SQL Server](https://github.com/NgocThao0412/Project_CSharp/tree/main/database)**
 - **[Tài liệu thiết kế hệ thống](https://drive.google.com/drive/folders/1VIbYgi-XYQEfzR7sXD95G7WE1Yjw3CCB)**
 - **[Sile thuyết trình](https://canva.link/9o2q9jhyxojqwc4)**
+- **[Figma](https://www.figma.com/design/ML8YGwjlCCU0X4UdL2zDcG/So-do-kien-truc-tong-the---Quan-ly-va-ban-linh-kien-may-tinh?node-id=0-1&t=KnM6TedPzYajSlZj-1)**
 ---
 
 ## Hướng dẫn cài đặt và chạy ứng dụng
