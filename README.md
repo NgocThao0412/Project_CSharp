@@ -10,6 +10,15 @@
 
 ---
 
+## Tài liệu liên quan
+
+- **[Mã nguồn dự án trên GitHub](https://github.com/NgocThao0412/Project_CSharp)**
+- **[Báo cáo đồ án C#](https://docs.google.com/document/d/1mSQYkmO7HZx96IuY9IXZEO2AytH8JedI7fuAPExuf54/edit?usp=sharing)**
+- **[Cơ sở dữ liệu SQL Server](https://github.com/NgocThao0412/Project_CSharp/tree/main/database)**
+- **Tài liệu thiết kế hệ thống:** [https://drive.google.com/drive/folders/1VIbYgi-XYQEfzR7sXD95G7WE1Yjw3CCB]
+- **Slide thuyết trình:** [https://canva.link/9o2q9jhyxojqwc4]
+---
+
 ## Hướng dẫn cài đặt và chạy ứng dụng
 
 - **Tải ứng dụng:** Clone hoặc tải ZIP dự án từ GitHub.
